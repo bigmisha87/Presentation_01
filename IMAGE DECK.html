@@ -1987,6 +1987,13 @@
         .slice(0, 80);
     }
 
+    function slugifyPathPart(input) {
+      return sanitizePathPart(input)
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9._-]/g, "_");
+    }
+
     function dataUrlToBlobInfo(src) {
       if (!isDataUrl(src)) return null;
       const commaIdx = src.indexOf(",");
@@ -2030,7 +2037,7 @@
     }
 
     function buildAssetFolder(card) {
-      const base = sanitizePathPart(card && card.title ? card.title : "") || (card && card.id ? String(card.id) : "card");
+      const base = slugifyPathPart(card && card.title ? card.title : "") || slugifyPathPart(card && card.id ? String(card.id) : "card");
       return "Gallery/" + base;
     }
 
