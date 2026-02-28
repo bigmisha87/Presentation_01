@@ -1,0 +1,1235 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Image Deck Presentation</title>
+  <link rel="icon" type="image/svg+xml" href="asssets/logo%201.svg" />
+  <style>
+    :root {
+      --font: "Segoe UI", Arial, sans-serif;
+      --uiScale: 1;
+      --viewerUiScale: 1;
+      --accent: #1a73e8;
+      --bg: #f6f8fc;
+      --surface: #ffffff;
+      --border: #dfe3ea;
+      --text: #202124;
+      --muted: #5f6368;
+      --shadow1: 0 1px 2px rgba(60,64,67,0.08);
+      --radius2: 24px;
+    }
+    [data-theme="dark"] {
+      --bg: #202124;
+      --surface: #303134;
+      --border: #3c4043;
+      --text: #e8eaed;
+      --muted: #9aa0a6;
+    }
+    html, body {
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    .uiScaleWrap {
+      zoom: var(--uiScale);
+      min-height: 100vh;
+      background: var(--bg);
+    }
+    @supports not (zoom: 1) {
+      .uiScaleWrap {
+        transform: scale(var(--uiScale));
+        transform-origin: top right;
+        width: calc(100% / var(--uiScale));
+      }
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 94%, var(--bg) 6%);
+      backdrop-filter: blur(12px);
+    }
+    .topbarInner {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .brandIcon {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+    .brandTitle {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .byline {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .displayControls {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .ctrlBtn, .ctrlSelect {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1;
+    }
+    .ctrlBtn {
+      padding: 9px 10px;
+      cursor: pointer;
+      min-width: 40px;
+      text-align: center;
+    }
+    .ctrlSelect {
+      min-width: 84px;
+      width: 84px;
+      padding: 8px 10px;
+      outline: none;
+    }
+    .ctrlLabel {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .wrap {
+      width: 100%;
+      padding: 16px 14px 20px 14px;
+    }
+    .statusMsg {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius2);
+      overflow: hidden;
+      box-shadow: var(--shadow1);
+    }
+    .cardHeader {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cardTitle {
+      font-size: 18px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+    .cardBody {
+      padding: 12px;
+      display: grid;
+      gap: 14px;
+      align-items: start;
+    }
+    .mainBlockCol, .refsBlockCol, .promptBlockCol { min-width: 0; }
+    .refsBlockCol, .promptBlockCol {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+    body[data-layout="classic"] .cardBody {
+      grid-template-columns: minmax(0, 1.85fr) minmax(240px, 0.95fr) minmax(0, 1.1fr);
+    }
+    body[data-layout="promptRefsLeft"] .cardBody {
+      grid-template-rows: auto auto;
+    }
+    html[lang="he"] body[data-layout="promptRefsLeft"] .cardBody {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+    html[lang="en"] body[data-layout="promptRefsLeft"] .cardBody {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    }
+    body[data-layout="promptRefsLeft"] .mainBlockCol { grid-row: 1 / span 2; }
+    html[lang="he"] body[data-layout="promptRefsLeft"] .mainBlockCol { grid-column: 1; }
+    html[lang="he"] body[data-layout="promptRefsLeft"] .promptBlockCol { grid-column: 2; grid-row: 1; }
+    html[lang="he"] body[data-layout="promptRefsLeft"] .refsBlockCol { grid-column: 2; grid-row: 2; }
+    html[lang="en"] body[data-layout="promptRefsLeft"] .mainBlockCol { grid-column: 2; }
+    html[lang="en"] body[data-layout="promptRefsLeft"] .promptBlockCol { grid-column: 1; grid-row: 1; }
+    html[lang="en"] body[data-layout="promptRefsLeft"] .refsBlockCol { grid-column: 1; grid-row: 2; }
+    @media (max-width: 1080px) {
+      body[data-layout="classic"] .cardBody {
+        grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+      }
+      body[data-layout="classic"] .promptBlockCol { grid-column: 1 / -1; }
+      body[data-layout="promptRefsLeft"] .cardBody {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+      body[data-layout="promptRefsLeft"] .mainBlockCol,
+      body[data-layout="promptRefsLeft"] .promptBlockCol,
+      body[data-layout="promptRefsLeft"] .refsBlockCol {
+        grid-column: auto;
+        grid-row: auto;
+      }
+    }
+    @media (max-width: 820px) {
+      body[data-layout="classic"] .cardBody { grid-template-columns: 1fr; }
+      body[data-layout="classic"] .promptBlockCol { grid-column: auto; }
+    }
+    .blockTitle {
+      margin: 0 0 10px 0;
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .mainImageLayout {
+      display: grid;
+      grid-template-columns: 84px minmax(0, 1fr);
+      gap: 10px;
+      align-items: stretch;
+      min-height: 280px;
+      max-height: min(800px, 100vh);
+    }
+    .mainThumbRail {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 2px;
+      max-height: min(800px, 100vh);
+    }
+    .mainThumbItem {
+      appearance: none;
+      width: 78px;
+      height: 78px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      flex: 0 0 auto;
+      background: var(--surface);
+      box-shadow: var(--shadow1);
+    }
+    .mainThumbItem img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .mainThumbItem.active {
+      border-color: color-mix(in srgb, var(--accent) 58%, var(--border) 42%);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent 76%);
+    }
+    .mainImageBox {
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      overflow: hidden;
+      min-height: 280px;
+      max-height: min(800px, 100vh);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mainImageBox img {
+      width: 100%;
+      height: auto;
+      max-height: min(800px, 100vh);
+      object-fit: contain;
+      display: block;
+      cursor: zoom-in;
+    }
+    .mainNavBtn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 82%, transparent 18%);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      box-shadow: var(--shadow1);
+    }
+    .mainNavPrev { left: 10px; }
+    .mainNavNext { right: 10px; }
+    @media (max-width: 920px) {
+      .mainImageLayout {
+        grid-template-columns: 1fr;
+        max-height: none;
+      }
+      .mainThumbRail {
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-height: none;
+      }
+    }
+    .emptyBox {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 24px;
+      text-align: center;
+    }
+    .refsGrid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    body[data-layout="promptRefsLeft"] .refsGrid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    @media (max-width: 1080px) {
+      .refsGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      body[data-layout="promptRefsLeft"] .refsGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      .refsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      body[data-layout="promptRefsLeft"] .refsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .refThumb {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--bg);
+      aspect-ratio: 1 / 1;
+    }
+    .refThumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+    }
+    .promptText {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 12px;
+      min-height: 120px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .overlay.open { display: flex; }
+    .viewer {
+      width: min(1600px, 99vw);
+      height: min(980px, 97vh);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(32,33,36,0.92);
+      overflow: hidden;
+      box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    [data-theme="light"] .viewer {
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(60,64,67,0.18);
+    }
+    .viewerTop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: calc(10px * var(--viewerUiScale));
+      padding: calc(10px * var(--viewerUiScale));
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .viewerTitle {
+      font-weight: 700;
+      font-size: calc(16px * var(--viewerUiScale));
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70%;
+    }
+    .viewerBtns {
+      display: flex;
+      gap: calc(8px * var(--viewerUiScale));
+      align-items: center;
+    }
+    .viewerBtn {
+      border: 1px solid rgba(60,64,67,0.22);
+      background: var(--surface);
+      color: var(--text);
+      padding: calc(8px * var(--viewerUiScale)) calc(10px * var(--viewerUiScale));
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 650;
+      font-size: calc(13px * var(--viewerUiScale));
+    }
+    .viewerZoomPct {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: calc(58px * var(--viewerUiScale));
+      padding: calc(8px * var(--viewerUiScale)) calc(10px * var(--viewerUiScale));
+      border-radius: 999px;
+      border: 1px solid rgba(60,64,67,0.22);
+      background: color-mix(in srgb, var(--surface) 82%, transparent 18%);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: calc(12px * var(--viewerUiScale));
+      user-select: none;
+    }
+    .viewerMain {
+      position: relative;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--bg) 85%, rgba(0,0,0,0.08) 15%);
+    }
+    .panZoom {
+      position: absolute;
+      inset: 0;
+      cursor: grab;
+    }
+    .panZoom:active { cursor: grabbing; }
+    .panZoom img {
+      position: absolute;
+      top: 50%;
+      right: 50%;
+      transform: translate(50%, -50%) scale(1);
+      transform-origin: center center;
+      max-width: none;
+      max-height: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+  </style>
+</head>
+<body data-theme="light" data-layout="promptRefsLeft">
+  <div class="uiScaleWrap">
+    <div class="topbar">
+      <div class="topbarInner">
+        <div class="brand">
+          <img class="brandIcon" src="asssets/logo%201.svg" alt="" aria-hidden="true" />
+          <div class="brandTitle" id="brandTitle">Image Deck</div>
+        </div>
+        <div class="displayControls">
+          <button class="ctrlBtn" id="langToggleBtn" type="button">English</button>
+          <button class="ctrlBtn" id="themeToggleBtn" type="button">Theme</button>
+          <span class="ctrlLabel" id="uiScaleLabel">Size</span>
+          <button class="ctrlBtn" id="uiScaleDownBtn" type="button">-</button>
+          <select class="ctrlSelect" id="uiScaleSelect"></select>
+          <span class="ctrlLabel" id="uiScaleValue">100%</span>
+          <button class="ctrlBtn" id="uiScaleUpBtn" type="button">+</button>
+        </div>
+        <div class="byline">by Misha Kerch</div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="statusMsg" id="statusMsg"></div>
+      <div class="cards" id="cards"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="viewer" role="dialog" aria-modal="true">
+      <div class="viewerTop">
+        <div class="viewerTitle" id="viewerTitle">Viewer</div>
+        <div class="viewerBtns">
+          <button class="viewerBtn" id="viewerPrevBtn">&#9664;</button>
+          <button class="viewerBtn" id="viewerNextBtn">&#9654;</button>
+          <button class="viewerBtn" id="viewer100Btn">100%</button>
+          <div class="viewerZoomPct" id="viewerZoomPct">100%</div>
+          <button class="viewerBtn" id="viewerResetBtn">Reset</button>
+          <button class="viewerBtn" id="viewerOpenBtn">Open Tab</button>
+          <button class="viewerBtn" id="viewerCloseBtn">Close</button>
+        </div>
+      </div>
+      <div class="viewerMain">
+        <div class="panZoom" id="panZoom"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCHEMES = {
+      googleBlue: { name: { he: "\u05db\u05d7\u05d5\u05dc \u05d2\u05d5\u05d2\u05dc", en: "Google Blue" }, accent: "#1a73e8" },
+      materialIndigo: { name: { he: "\u05d0\u05d9\u05e0\u05d3\u05d9\u05d2\u05d5", en: "Material Indigo" }, accent: "#3f51b5" },
+      emerald: { name: { he: "\u05d0\u05de\u05e8\u05dc\u05d3", en: "Emerald" }, accent: "#10b981" },
+      sunsetOrange: { name: { he: "\u05db\u05ea\u05d5\u05dd \u05e9\u05e7\u05d9\u05e2\u05d4", en: "Sunset Orange" }, accent: "#f97316" },
+      mono: { name: { he: "\u05de\u05d5\u05e0\u05d5\u05db\u05e8\u05d5\u05dd", en: "Minimal Mono" }, accent: "#5f6368" },
+    };
+    const SCHEME_KEYS = Object.keys(SCHEMES);
+    const CACHE_DB_NAME = "imageDeckLocalCache";
+    const CACHE_STORE_NAME = "kv";
+    const CACHE_LAST_DATA_KEY = "lastData";
+    const CACHE_JSON_HANDLE_KEY = "jsonFileHandle";
+    const PROJECT_CACHE_SCOPE = (() => {
+      try { return new URL(".", window.location.href).href; } catch { return String(window.location.href || "default"); }
+    })();
+
+    function scopedCacheKey(baseKey) {
+      return String(baseKey) + "::" + PROJECT_CACHE_SCOPE;
+    }
+
+    const I18N = {
+      he: {
+        appTitle: "Image Deck",
+        langToggle: "English",
+        themeToggle: "\u05d1\u05d4\u05d9\u05e8/\u05db\u05d4\u05d4",
+        scheme: "\u05e1\u05db\u05de\u05d4",
+        schemePrev: "\u05e1\u05db\u05de\u05d4 \u05e7\u05d5\u05d3\u05de\u05ea",
+        schemeNext: "\u05e1\u05db\u05de\u05d4 \u05d4\u05d1\u05d0\u05d4",
+        uiScale: "\u05d2\u05d5\u05d3\u05dc",
+        main: "\u05ea\u05de\u05d5\u05e0\u05d4 \u05e8\u05d0\u05e9\u05d9\u05ea",
+        refs: "\u05e8\u05e4\u05e8\u05e0\u05e1\u05d9\u05dd",
+        prompt: "\u05e4\u05e8\u05d5\u05de\u05e4\u05d8",
+        noMain: "\u05d0\u05d9\u05df \u05ea\u05de\u05d5\u05e0\u05d4 \u05e8\u05d0\u05e9\u05d9\u05ea",
+        noRefs: "\u05d0\u05d9\u05df \u05e8\u05e4\u05e8\u05e0\u05e1\u05d9\u05dd",
+        noPrompt: "\u05d0\u05d9\u05df \u05e4\u05e8\u05d5\u05de\u05e4\u05d8",
+        noCards: "\u05d0\u05d9\u05df \u05db\u05e8\u05d8\u05d9\u05e1\u05d9\u05dd \u05dc\u05d4\u05e6\u05d2\u05d4",
+        loading: "\u05d8\u05d5\u05e2\u05df \u05e0\u05ea\u05d5\u05e0\u05d9\u05dd...",
+        loadFail: "\u05dc\u05d0 \u05e0\u05de\u05e6\u05d0 data.json \u05d0\u05d5 \u05e9\u05d4\u05d8\u05e2\u05d9\u05e0\u05d4 \u05e0\u05db\u05e9\u05dc\u05d4",
+        viewer: "\u05ea\u05e6\u05d5\u05d2\u05d4",
+        prev: "\u05e7\u05d5\u05d3\u05dd",
+        next: "\u05d4\u05d1\u05d0",
+        viewer100: "100%",
+        reset: "\u05d0\u05d9\u05e4\u05d5\u05e1",
+        openTab: "\u05e4\u05ea\u05d7 \u05d1\u05d8\u05d0\u05d1",
+        close: "\u05e1\u05d2\u05d5\u05e8",
+      },
+      en: {
+        appTitle: "Image Deck",
+        langToggle: "\u05e2\u05d1\u05e8\u05d9\u05ea",
+        themeToggle: "Light/Dark",
+        scheme: "Scheme",
+        schemePrev: "Previous scheme",
+        schemeNext: "Next scheme",
+        uiScale: "Size",
+        main: "Main image",
+        refs: "References",
+        prompt: "Prompt",
+        noMain: "No main image",
+        noRefs: "No references",
+        noPrompt: "No prompt",
+        noCards: "No cards to display",
+        loading: "Loading data...",
+        loadFail: "data.json not found or failed to load",
+        viewer: "Viewer",
+        prev: "Prev",
+        next: "Next",
+        viewer100: "100%",
+        reset: "Reset",
+        openTab: "Open Tab",
+        close: "Close",
+      },
+    };
+
+    const state = {
+      prefs: {
+        theme: "light",
+        schemeKey: "googleBlue",
+        uiScale: 1,
+        lang: "he",
+        layout: "promptRefsLeft",
+      },
+      cards: [],
+      viewer: {
+        open: false,
+        title: "",
+        items: [],
+        index: 0,
+        src: "",
+        scale: 1,
+        fitScale: 1,
+        minScale: 0.2,
+        maxScale: 8,
+        x: 0,
+        y: 0,
+        dragging: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        baseX: 0,
+        baseY: 0,
+      },
+      localPrefs: {},
+    };
+
+    const el = {
+      body: document.body,
+      brandTitle: document.getElementById("brandTitle"),
+      statusMsg: document.getElementById("statusMsg"),
+      cards: document.getElementById("cards"),
+      langToggleBtn: document.getElementById("langToggleBtn"),
+      themeToggleBtn: document.getElementById("themeToggleBtn"),
+      uiScaleLabel: document.getElementById("uiScaleLabel"),
+      uiScaleSelect: document.getElementById("uiScaleSelect"),
+      uiScaleValue: document.getElementById("uiScaleValue"),
+      uiScaleDownBtn: document.getElementById("uiScaleDownBtn"),
+      uiScaleUpBtn: document.getElementById("uiScaleUpBtn"),
+      overlay: document.getElementById("overlay"),
+      viewerTitle: document.getElementById("viewerTitle"),
+      viewerPrevBtn: document.getElementById("viewerPrevBtn"),
+      viewerNextBtn: document.getElementById("viewerNextBtn"),
+      viewer100Btn: document.getElementById("viewer100Btn"),
+      viewerZoomPct: document.getElementById("viewerZoomPct"),
+      viewerResetBtn: document.getElementById("viewerResetBtn"),
+      viewerOpenBtn: document.getElementById("viewerOpenBtn"),
+      viewerCloseBtn: document.getElementById("viewerCloseBtn"),
+      panZoom: document.getElementById("panZoom"),
+    };
+
+    function t(key) {
+      return (I18N[state.prefs.lang] && I18N[state.prefs.lang][key]) || I18N.he[key] || key;
+    }
+
+    function normalizeCards(cards) {
+      const safe = Array.isArray(cards) ? cards : [];
+      return safe.map((c, idx) => {
+        const id = c && c.id ? String(c.id) : "c" + idx;
+        const title = c && typeof c.title === "string" ? c.title : "";
+        const prompt = c && typeof c.prompt === "string" ? c.prompt : "";
+        const legacyMain = c && typeof c.mainImage === "string" ? c.mainImage : "";
+        const mainsRaw = c && Array.isArray(c.mainImages) ? c.mainImages : (legacyMain ? [legacyMain] : []);
+        const mains = mainsRaw.filter((x) => typeof x === "string" && x).slice(0, 20);
+        const idxRaw = c && Number.isFinite(c.mainImageIndex) ? Number(c.mainImageIndex) : 0;
+        const mainIdx = mains.length ? Math.max(0, Math.min(mains.length - 1, idxRaw)) : 0;
+        const main = mains.length ? mains[mainIdx] : "";
+        const refs = c && Array.isArray(c.references) ? c.references.filter((x) => typeof x === "string") : [];
+        const order = c && Number.isFinite(c.order) ? Number(c.order) : idx + 1;
+        return { id, title, prompt, mainImage: main, mainImages: mains, mainImageIndex: mainIdx, references: refs.slice(0, 20), order };
+      }).sort((a, b) => a.order - b.order);
+    }
+
+    function setAccent(hex) {
+      document.documentElement.style.setProperty("--accent", hex);
+    }
+
+    function setUiScale(scale) {
+      const s = Math.max(0.8, Math.min(2, Number(scale) || 1));
+      const pct = Math.round(s * 100 / 10) * 10;
+      state.prefs.uiScale = pct / 100;
+      document.documentElement.style.setProperty("--uiScale", String(state.prefs.uiScale));
+      document.documentElement.style.setProperty("--viewerUiScale", String(state.prefs.uiScale));
+      if (el.uiScaleSelect) el.uiScaleSelect.value = String(pct);
+      el.uiScaleValue.textContent = pct + "%";
+    }
+
+    function fillScaleSelect() {
+      if (!el.uiScaleSelect) return;
+      el.uiScaleSelect.innerHTML = "";
+      for (let pct = 80; pct <= 200; pct += 10) {
+        const opt = document.createElement("option");
+        opt.value = String(pct);
+        opt.textContent = pct + "%";
+        el.uiScaleSelect.appendChild(opt);
+      }
+    }
+
+    function applyPrefs() {
+      const p = state.prefs;
+      const isHe = p.lang === "he";
+      document.documentElement.lang = isHe ? "he" : "en";
+      document.documentElement.dir = isHe ? "rtl" : "ltr";
+      document.title = t("appTitle") + " Presentation";
+      el.brandTitle.textContent = t("appTitle");
+      el.body.setAttribute("data-theme", p.theme === "dark" ? "dark" : "light");
+      el.body.setAttribute("data-layout", p.layout === "classic" ? "classic" : "promptRefsLeft");
+      const scheme = SCHEMES[p.schemeKey] || SCHEMES.googleBlue;
+      setAccent(scheme.accent);
+      setUiScale(p.uiScale);
+
+      el.langToggleBtn.textContent = t("langToggle");
+      el.themeToggleBtn.textContent = t("themeToggle");
+      el.uiScaleLabel.textContent = t("uiScale");
+      el.viewerTitle.textContent = state.viewer.title || t("viewer");
+      el.viewerPrevBtn.textContent = t("prev");
+      el.viewerNextBtn.textContent = t("next");
+      el.viewer100Btn.textContent = t("viewer100");
+      el.viewerResetBtn.textContent = t("reset");
+      el.viewerOpenBtn.textContent = t("openTab");
+      el.viewerCloseBtn.textContent = t("close");
+    }
+
+    function applyTextDirection(node, value) {
+      const hasHeb = /[\u0590-\u05FF]/.test(String(value || ""));
+      node.dir = hasHeb ? "rtl" : "ltr";
+      node.style.textAlign = hasHeb ? "right" : "left";
+    }
+
+    function normalizeCardMainImages(card) {
+      if (!card) return;
+      const legacyMain = typeof card.mainImage === "string" ? card.mainImage : "";
+      const mainsRaw = Array.isArray(card.mainImages) ? card.mainImages : (legacyMain ? [legacyMain] : []);
+      const mains = mainsRaw.filter((x) => typeof x === "string" && x).slice(0, 20);
+      const idxRaw = Number.isFinite(card.mainImageIndex) ? Number(card.mainImageIndex) : 0;
+      const mainIdx = mains.length ? Math.max(0, Math.min(mains.length - 1, idxRaw)) : 0;
+      card.mainImages = mains;
+      card.mainImageIndex = mainIdx;
+      card.mainImage = mains.length ? mains[mainIdx] : "";
+    }
+
+    function getCardMainImages(card) {
+      if (!card) return [];
+      normalizeCardMainImages(card);
+      return card.mainImages;
+    }
+
+    function getCardMainImage(card) {
+      if (!card) return "";
+      normalizeCardMainImages(card);
+      return card.mainImage || "";
+    }
+
+    function setCardMainImageIndex(cardId, index) {
+      const card = state.cards.find((c) => c && c.id === cardId);
+      if (!card) return;
+      const mains = getCardMainImages(card);
+      if (!mains.length) return;
+      card.mainImageIndex = Math.max(0, Math.min(mains.length - 1, Number(index) || 0));
+      normalizeCardMainImages(card);
+      render();
+    }
+
+    function stepCardMainImage(cardId, step) {
+      const card = state.cards.find((c) => c && c.id === cardId);
+      if (!card) return;
+      const mains = getCardMainImages(card);
+      const len = mains.length;
+      if (len < 2) return;
+      card.mainImageIndex = (card.mainImageIndex + step + len) % len;
+      normalizeCardMainImages(card);
+      render();
+    }
+
+    function persistLocalPrefs() {
+      const payload = {
+        theme: state.prefs.theme,
+        schemeKey: state.prefs.schemeKey,
+        uiScale: state.prefs.uiScale,
+        lang: state.prefs.lang,
+      };
+      localStorage.setItem("imageDeck.presentation.prefs", JSON.stringify(payload));
+    }
+
+    function loadLocalPrefs() {
+      try {
+        const raw = localStorage.getItem("imageDeck.presentation.prefs");
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (p && (p.theme === "light" || p.theme === "dark")) state.localPrefs.theme = p.theme;
+        if (p && typeof p.schemeKey === "string") state.localPrefs.schemeKey = p.schemeKey;
+        if (p && Number.isFinite(p.uiScale)) state.localPrefs.uiScale = Number(p.uiScale);
+        if (p && (p.lang === "he" || p.lang === "en")) state.localPrefs.lang = p.lang;
+      } catch {}
+    }
+
+    function applyLocalPrefsOverride() {
+      const p = state.localPrefs;
+      if (p.theme === "light" || p.theme === "dark") state.prefs.theme = p.theme;
+      if (typeof p.schemeKey === "string" && p.schemeKey in SCHEMES) state.prefs.schemeKey = p.schemeKey;
+      if (Number.isFinite(p.uiScale)) state.prefs.uiScale = Math.max(0.8, Math.min(2, Number(p.uiScale)));
+      if (p.lang === "he" || p.lang === "en") state.prefs.lang = p.lang;
+    }
+
+    function openCacheDb() {
+      if (!("indexedDB" in window)) return Promise.resolve(null);
+      return new Promise((resolve) => {
+        try {
+          const req = indexedDB.open(CACHE_DB_NAME, 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(CACHE_STORE_NAME)) {
+              db.createObjectStore(CACHE_STORE_NAME);
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+        } catch {
+          resolve(null);
+        }
+      });
+    }
+
+    async function readCacheValue(key) {
+      try {
+        const db = await openCacheDb();
+        if (!db) return null;
+        const tx = db.transaction(CACHE_STORE_NAME, "readonly");
+        const req = tx.objectStore(CACHE_STORE_NAME).get(scopedCacheKey(key));
+        const val = await new Promise((resolve) => {
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+        return val || null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function readDataFromCachedHandle() {
+      try {
+        const handle = await readCacheValue(CACHE_JSON_HANDLE_KEY);
+        if (!handle) return null;
+        if ("queryPermission" in handle) {
+          let perm = await handle.queryPermission({ mode: "read" });
+          if (perm !== "granted" && "requestPermission" in handle) {
+            perm = await handle.requestPermission({ mode: "read" });
+          }
+          if (perm !== "granted") return null;
+        }
+        const file = await handle.getFile();
+        const text = await file.text();
+        return JSON.parse(text);
+      } catch {
+        return null;
+      }
+    }
+
+    async function readDataFromCachedObject() {
+      const obj = await readCacheValue(CACHE_LAST_DATA_KEY);
+      return obj && typeof obj === "object" ? obj : null;
+    }
+
+    function applyLoadedData(obj) {
+      if (obj && obj.prefs) {
+        const p = obj.prefs;
+        if (p.theme === "light" || p.theme === "dark") state.prefs.theme = p.theme;
+        if (typeof p.schemeKey === "string" && p.schemeKey in SCHEMES) state.prefs.schemeKey = p.schemeKey;
+        if (Number.isFinite(p.uiScale)) state.prefs.uiScale = Number(p.uiScale);
+        if (p.lang === "he" || p.lang === "en") state.prefs.lang = p.lang;
+        if (p.layout === "classic" || p.layout === "promptRefsLeft") state.prefs.layout = p.layout;
+      }
+      applyLocalPrefsOverride();
+      state.cards = normalizeCards(obj && obj.cards);
+      applyPrefs();
+      render();
+    }
+
+    function render() {
+      el.cards.innerHTML = "";
+      if (!state.cards.length) {
+        const empty = document.createElement("div");
+        empty.className = "statusMsg";
+        empty.textContent = t("noCards");
+        el.cards.appendChild(empty);
+        return;
+      }
+
+      state.cards.forEach((card) => {
+        const wrap = document.createElement("section");
+        wrap.className = "card";
+
+        const header = document.createElement("div");
+        header.className = "cardHeader";
+        const title = document.createElement("div");
+        title.className = "cardTitle";
+        title.textContent = card.title || "";
+        applyTextDirection(title, card.title || "");
+        header.appendChild(title);
+        wrap.appendChild(header);
+
+        const body = document.createElement("div");
+        body.className = "cardBody";
+
+        const mainCol = document.createElement("div");
+        mainCol.className = "mainBlockCol";
+        const mainTitle = document.createElement("div");
+        mainTitle.className = "blockTitle";
+        mainTitle.textContent = t("main");
+        const mainItems = getCardMainImages(card);
+        const mainIdx = Number.isFinite(card.mainImageIndex) ? Number(card.mainImageIndex) : 0;
+        const mainSrc = getCardMainImage(card);
+        const mainLayout = document.createElement("div");
+        mainLayout.className = "mainImageLayout";
+        const mainThumbRail = document.createElement("div");
+        mainThumbRail.className = "mainThumbRail";
+        for (let i = 0; i < mainItems.length; i++) {
+          const thumb = document.createElement("button");
+          thumb.type = "button";
+          thumb.className = "mainThumbItem" + (i === mainIdx ? " active" : "");
+          const tImg = document.createElement("img");
+          tImg.src = mainItems[i];
+          tImg.alt = (card.title || t("main")) + " " + (i + 1);
+          thumb.appendChild(tImg);
+          thumb.addEventListener("click", () => setCardMainImageIndex(card.id, i));
+          mainThumbRail.appendChild(thumb);
+        }
+        const mainBox = document.createElement("div");
+        mainBox.className = "mainImageBox";
+        if (mainSrc) {
+          const img = document.createElement("img");
+          img.src = mainSrc;
+          img.alt = card.title || t("main");
+          img.addEventListener("click", () => openViewer(card.title || t("viewer"), mainItems, mainIdx));
+          mainBox.appendChild(img);
+          if (mainItems.length > 1) {
+            const prevBtn = document.createElement("button");
+            prevBtn.type = "button";
+            prevBtn.className = "mainNavBtn mainNavPrev";
+            prevBtn.textContent = "◀";
+            prevBtn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              stepCardMainImage(card.id, -1);
+            });
+            mainBox.appendChild(prevBtn);
+
+            const nextBtn = document.createElement("button");
+            nextBtn.type = "button";
+            nextBtn.className = "mainNavBtn mainNavNext";
+            nextBtn.textContent = "▶";
+            nextBtn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              stepCardMainImage(card.id, 1);
+            });
+            mainBox.appendChild(nextBtn);
+          }
+        } else {
+          const emptyMain = document.createElement("div");
+          emptyMain.className = "emptyBox";
+          emptyMain.textContent = t("noMain");
+          mainBox.appendChild(emptyMain);
+        }
+        mainCol.appendChild(mainTitle);
+        if (mainItems.length > 1) {
+          mainLayout.appendChild(mainThumbRail);
+          mainLayout.appendChild(mainBox);
+          mainCol.appendChild(mainLayout);
+        } else {
+          mainCol.appendChild(mainBox);
+        }
+
+        const refsCol = document.createElement("div");
+        refsCol.className = "refsBlockCol";
+        const refsTitle = document.createElement("div");
+        refsTitle.className = "blockTitle";
+        refsTitle.textContent = t("refs");
+        const refsGrid = document.createElement("div");
+        refsGrid.className = "refsGrid";
+        if (card.references.length) {
+          card.references.forEach((src, idx) => {
+            const thumb = document.createElement("div");
+            thumb.className = "refThumb";
+            const img = document.createElement("img");
+            img.src = src;
+            img.alt = (card.title || "Ref") + " " + (idx + 1);
+            img.addEventListener("click", () => openViewer(card.title || t("viewer"), card.references, idx));
+            thumb.appendChild(img);
+            refsGrid.appendChild(thumb);
+          });
+        } else {
+          const emptyRefs = document.createElement("div");
+          emptyRefs.className = "emptyBox";
+          emptyRefs.textContent = t("noRefs");
+          refsGrid.appendChild(emptyRefs);
+        }
+        refsCol.appendChild(refsTitle);
+        refsCol.appendChild(refsGrid);
+
+        const promptCol = document.createElement("div");
+        promptCol.className = "promptBlockCol";
+        const promptTitle = document.createElement("div");
+        promptTitle.className = "blockTitle";
+        promptTitle.textContent = t("prompt");
+        const promptText = document.createElement("div");
+        promptText.className = "promptText";
+        promptText.textContent = card.prompt || t("noPrompt");
+        applyTextDirection(promptText, card.prompt || "");
+        promptCol.appendChild(promptTitle);
+        promptCol.appendChild(promptText);
+
+        body.appendChild(mainCol);
+        body.appendChild(refsCol);
+        body.appendChild(promptCol);
+        wrap.appendChild(body);
+        el.cards.appendChild(wrap);
+      });
+    }
+
+    function openViewer(title, items, index) {
+      if (!Array.isArray(items) || !items.length) return;
+      state.viewer.open = true;
+      state.viewer.title = title || t("viewer");
+      state.viewer.items = items.slice();
+      state.viewer.index = Math.max(0, Math.min(items.length - 1, Number(index) || 0));
+      state.viewer.src = state.viewer.items[state.viewer.index];
+      state.viewer.scale = 1;
+      state.viewer.fitScale = 1;
+      state.viewer.x = 0;
+      state.viewer.y = 0;
+      renderViewer();
+      el.overlay.classList.add("open");
+      el.overlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeViewer() {
+      state.viewer.open = false;
+      state.viewer.items = [];
+      state.viewer.index = 0;
+      el.overlay.classList.remove("open");
+      el.overlay.setAttribute("aria-hidden", "true");
+      el.panZoom.innerHTML = "";
+    }
+
+    function renderViewer() {
+      el.viewerTitle.textContent = state.viewer.title || t("viewer");
+      el.panZoom.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = state.viewer.src;
+      img.alt = state.viewer.title || "";
+      img.draggable = false;
+      img.addEventListener("load", () => {
+        const viewerMain = el.overlay.querySelector(".viewerMain");
+        const boxW = viewerMain ? viewerMain.clientWidth : 0;
+        const boxH = viewerMain ? viewerMain.clientHeight : 0;
+        const iw = img.naturalWidth || 1;
+        const ih = img.naturalHeight || 1;
+        const fit = boxW > 0 && boxH > 0 ? Math.min(boxW / iw, boxH / ih) : 1;
+        state.viewer.fitScale = Number.isFinite(fit) && fit > 0 ? fit : 1;
+        state.viewer.scale = state.viewer.fitScale;
+        state.viewer.x = 0;
+        state.viewer.y = 0;
+        applyViewerTransform(img);
+      });
+      el.panZoom.appendChild(img);
+      applyViewerTransform(img);
+    }
+
+    function applyViewerTransform(img) {
+      img.style.transform = "translate(50%, -50%) translate(" + state.viewer.x + "px, " + state.viewer.y + "px) scale(" + state.viewer.scale + ")";
+      updateViewerZoomPct();
+    }
+
+    function updateViewerZoomPct() {
+      if (!el.viewerZoomPct) return;
+      const s = Number(state.viewer.scale) || 1;
+      el.viewerZoomPct.textContent = Math.max(1, Math.round(s * 100)) + "%";
+    }
+
+    function viewerGo(dir) {
+      if (!state.viewer.open || !state.viewer.items.length) return;
+      const len = state.viewer.items.length;
+      state.viewer.index = (state.viewer.index + dir + len) % len;
+      state.viewer.src = state.viewer.items[state.viewer.index];
+      renderViewer();
+    }
+
+    function handleViewerWheel(e) {
+      if (!state.viewer.open) return;
+      e.preventDefault();
+      const img = el.panZoom.querySelector("img");
+      if (!img) return;
+      const factor = e.deltaY > 0 ? 0.92 : 1.08;
+      const next = state.viewer.scale * factor;
+      state.viewer.scale = Math.max(state.viewer.minScale, Math.min(state.viewer.maxScale, next));
+      applyViewerTransform(img);
+    }
+
+    function handleViewerDown(e) {
+      if (!state.viewer.open || e.button !== 0) return;
+      const img = el.panZoom.querySelector("img");
+      if (!img || e.target !== img) return;
+      state.viewer.dragging = true;
+      state.viewer.dragStartX = e.clientX;
+      state.viewer.dragStartY = e.clientY;
+      state.viewer.baseX = state.viewer.x;
+      state.viewer.baseY = state.viewer.y;
+    }
+
+    function handleViewerMove(e) {
+      if (!state.viewer.open || !state.viewer.dragging) return;
+      const img = el.panZoom.querySelector("img");
+      if (!img) return;
+      state.viewer.x = state.viewer.baseX + (e.clientX - state.viewer.dragStartX);
+      state.viewer.y = state.viewer.baseY + (e.clientY - state.viewer.dragStartY);
+      applyViewerTransform(img);
+    }
+
+    function handleViewerUp() {
+      state.viewer.dragging = false;
+    }
+
+    function resetViewer() {
+      const img = el.panZoom.querySelector("img");
+      if (!img) return;
+      state.viewer.scale = state.viewer.fitScale || 1;
+      state.viewer.x = 0;
+      state.viewer.y = 0;
+      applyViewerTransform(img);
+    }
+
+    function setViewer100() {
+      const img = el.panZoom.querySelector("img");
+      if (!img) return;
+      state.viewer.scale = 1;
+      state.viewer.x = 0;
+      state.viewer.y = 0;
+      applyViewerTransform(img);
+    }
+
+    function openViewerInTab() {
+      if (!state.viewer.src) return;
+      const src = state.viewer.src;
+      if (src.startsWith("data:")) {
+        try {
+          const commaIdx = src.indexOf(",");
+          if (commaIdx > 0) {
+            const header = src.slice(0, commaIdx);
+            const body = src.slice(commaIdx + 1);
+            const mimeMatch = /^data:([^;]+)/i.exec(header);
+            const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+            const isBase64 = /;base64/i.test(header);
+            const binary = isBase64 ? atob(body) : decodeURIComponent(body);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            const blob = new Blob([bytes], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 60 * 1000);
+            return;
+          }
+        } catch {}
+      }
+      const a = document.createElement("a");
+      a.href = src;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function toggleLanguage() {
+      state.prefs.lang = state.prefs.lang === "he" ? "en" : "he";
+      applyPrefs();
+      render();
+      persistLocalPrefs();
+    }
+
+    function toggleTheme() {
+      state.prefs.theme = state.prefs.theme === "dark" ? "light" : "dark";
+      applyPrefs();
+      persistLocalPrefs();
+    }
+
+    function stepUiScale(delta) {
+      setUiScale((state.prefs.uiScale || 1) + delta);
+      persistLocalPrefs();
+    }
+
+    function updateUiScaleNow(pct) {
+      setUiScale((Number(pct) || 100) / 100);
+      persistLocalPrefs();
+    }
+
+    async function loadData() {
+      el.statusMsg.textContent = t("loading");
+      let obj = null;
+      try {
+        const dataUrl = new URL("./data.json", window.location.href);
+        const res = await fetch(dataUrl.toString(), { cache: "no-store" });
+        if (res.ok) obj = await res.json();
+      } catch {}
+
+      if (!obj) {
+        try {
+          const tplUrl = new URL("./data.template.json", window.location.href);
+          const res = await fetch(tplUrl.toString(), { cache: "no-store" });
+          if (res.ok) obj = await res.json();
+        } catch {}
+      }
+
+      if (!obj) obj = await readDataFromCachedHandle();
+      if (!obj) obj = await readDataFromCachedObject();
+
+      if (obj) {
+        applyLoadedData(obj);
+        el.statusMsg.textContent = "";
+      } else {
+        applyLocalPrefsOverride();
+        applyPrefs();
+        state.cards = [];
+        render();
+        el.statusMsg.textContent = t("loadFail");
+      }
+    }
+
+    el.langToggleBtn.addEventListener("click", () => toggleLanguage());
+    el.themeToggleBtn.addEventListener("click", () => toggleTheme());
+    el.uiScaleSelect.addEventListener("change", () => updateUiScaleNow(el.uiScaleSelect.value));
+    el.uiScaleDownBtn.addEventListener("click", () => stepUiScale(-0.1));
+    el.uiScaleUpBtn.addEventListener("click", () => stepUiScale(0.1));
+
+    el.viewerCloseBtn.addEventListener("click", () => closeViewer());
+    el.viewerPrevBtn.addEventListener("click", () => viewerGo(-1));
+    el.viewerNextBtn.addEventListener("click", () => viewerGo(1));
+    el.viewer100Btn.addEventListener("click", () => setViewer100());
+    el.viewerResetBtn.addEventListener("click", () => resetViewer());
+    el.viewerOpenBtn.addEventListener("click", () => openViewerInTab());
+    el.overlay.addEventListener("click", (e) => {
+      if (e.target === el.overlay) closeViewer();
+    });
+    el.panZoom.addEventListener("wheel", handleViewerWheel, { passive: false });
+    el.panZoom.addEventListener("mousedown", handleViewerDown);
+    window.addEventListener("mousemove", handleViewerMove);
+    window.addEventListener("mouseup", handleViewerUp);
+    window.addEventListener("keydown", (e) => {
+      if (!state.viewer.open) return;
+      if (e.key === "Escape") { closeViewer(); return; }
+      if (e.key === "ArrowRight") { e.preventDefault(); viewerGo(1); return; }
+      if (e.key === "ArrowLeft") { e.preventDefault(); viewerGo(-1); return; }
+    });
+
+    fillScaleSelect();
+    loadLocalPrefs();
+    applyPrefs();
+    loadData();
+  </script>
+</body>
+</html>

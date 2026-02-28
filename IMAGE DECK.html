@@ -1,0 +1,3149 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Lesson Studio</title>
+  <link rel="icon" type="image/svg+xml" href="asssets/logo%201.svg" />
+  <style>
+    :root {
+      --font: sans-serif;
+      --uiScale: 1;
+      --viewerUiScale: 1;
+      --accent: #1a73e8;
+      --accentText: #ffffff;
+      --accentSoft: rgba(26,115,232,0.14);
+      --accentSoft2: rgba(26,115,232,0.10);
+      --danger: #d93025;
+      --ok: #188038;
+
+      --bg: #f6f8fc;
+      --surface: #ffffff;
+      --surface2: #ffffff;
+      --border: #dfe3ea;
+      --text: #202124;
+      --muted: #5f6368;
+
+      --shadow1: 0 1px 2px rgba(60,64,67,0.08);
+      --shadow2: 0 4px 12px rgba(60,64,67,0.10);
+      --radius: 18px;
+      --radius2: 24px;
+      --gap: 14px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #202124;
+      --surface: #303134;
+      --surface2: #2a2b2f;
+      --border: #3c4043;
+      --text: #e8eaed;
+      --muted: #9aa0a6;
+
+      --shadow1: 0 1px 2px rgba(0,0,0,0.28);
+      --shadow2: 0 4px 12px rgba(0,0,0,0.38);
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      font-family: var(--font);
+      font-weight: 400 !important;
+    }
+    input, button, select, textarea { font-family: inherit; }
+
+    .uiScaleWrap { zoom: var(--uiScale); }
+    @supports not (zoom: 1) {
+      .uiScaleWrap {
+        transform: scale(var(--uiScale));
+        transform-origin: top right;
+        width: calc(100% / var(--uiScale));
+      }
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: color-mix(in srgb, var(--surface) 94%, var(--bg) 6%);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbarInner {
+      max-width: none;
+      margin: 0 auto;
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      justify-content: stretch;
+      direction: ltr;
+    }
+
+    .brand {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      user-select: none;
+      white-space: nowrap;
+      min-width: 0;
+      padding: 0;
+    }
+
+    .brandTitle {
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brandOwner {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .brandIcon {
+      width: 24px;
+      height: 24px;
+      display: block;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      justify-self: center;
+      grid-row: 1;
+      grid-column: 2;
+      direction: ltr;
+    }
+    .presentSlot {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      justify-self: end;
+      grid-row: 1;
+      grid-column: 3;
+      direction: ltr;
+    }
+    .brand {
+      grid-row: 1;
+      grid-column: 1;
+      justify-self: start;
+      direction: ltr;
+    }
+    @media (max-width: 980px) {
+      .topbarInner {
+        grid-template-columns: 1fr;
+        justify-items: stretch;
+      }
+      .brand,
+      .controls,
+      .presentSlot {
+        grid-row: auto;
+        grid-column: auto;
+      }
+      .brand,
+      .controls,
+      .presentSlot {
+        justify-self: stretch;
+      }
+      .controls { justify-content: flex-start; }
+    }
+    #langToggleBtn { margin-inline-end: 18px; }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow1);
+      font-weight: 650;
+      transition: background 140ms ease, transform 140ms ease, border-color 140ms ease;
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btnPrimary {
+      background: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 65%, var(--border) 35%);
+      color: var(--accentText);
+    }
+
+    .btnTonal {
+      background: var(--accentSoft);
+      border-color: color-mix(in srgb, var(--accent) 30%, var(--border) 70%);
+      color: color-mix(in srgb, var(--accent) 80%, var(--text) 20%);
+      box-shadow: none;
+    }
+
+    [data-theme="dark"] .btnTonal {
+      background: rgba(138,180,248,0.14);
+      border-color: color-mix(in srgb, var(--accent) 30%, var(--border) 70%);
+      color: #8ab4f8;
+    }
+
+    .btnDanger {
+      background: color-mix(in srgb, var(--danger) 16%, var(--surface) 84%);
+      border-color: color-mix(in srgb, var(--danger) 30%, var(--border) 70%);
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    .btnSmall {
+      padding: 8px 10px;
+      font-weight: 650;
+    }
+
+    .statusRow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 999px;
+      box-shadow: var(--shadow1);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--ok);
+    }
+
+    .dotDirty { background: var(--danger); }
+
+    .statusText {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    .zoomBox {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow1);
+    }
+
+    .zoomLabel {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 650;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .scaleSelect {
+      min-width: 84px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .wrap {
+      max-width: none;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px 14px 90px 14px;
+    }
+
+    .hintRow {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .hintRow.hidden { display: none; }
+
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .addCardBottomWrap {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow1);
+      overflow: hidden;
+    }
+
+    .cardHeader {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      background: transparent;
+    }
+
+    .cardHeaderLeft {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+      flex: 1;
+    }
+    .titleResMeta {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    html[lang="he"] .cardHeaderLeft .titleResMeta { order: -1; }
+    html[lang="en"] .cardHeaderLeft .titleResMeta { order: 1; }
+
+    .dragHandle {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      user-select: none;
+      flex: 0 0 auto;
+      box-shadow: var(--shadow1);
+    }
+
+    .titleInput {
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      font-weight: 700;
+    }
+
+    .titleInput::placeholder { color: color-mix(in srgb, var(--muted) 70%, transparent 30%); }
+
+    .cardHeaderRight {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+    .cardBody {
+      padding: 12px;
+      display: grid;
+      gap: 14px;
+      align-items: start;
+    }
+    .mainBlockCol,
+    .refsBlockCol,
+    .promptBlockCol { min-width: 0; }
+    .refsBlockCol,
+    .promptBlockCol {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    body[data-layout="classic"] .cardBody {
+      grid-template-columns: minmax(0, 1.85fr) minmax(240px, 0.92fr) minmax(0, 1.1fr);
+    }
+    @media (max-width: 1320px) {
+      body[data-layout="classic"] .cardBody { grid-template-columns: minmax(0, 1.65fr) minmax(220px, 0.95fr) minmax(0, 1fr); }
+    }
+    @media (max-width: 1080px) {
+      body[data-layout="classic"] .cardBody { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); }
+      body[data-layout="classic"] .promptBlockCol { grid-column: 1 / -1; }
+    }
+    @media (max-width: 820px) {
+      body[data-layout="classic"] .cardBody { grid-template-columns: 1fr; }
+      body[data-layout="classic"] .promptBlockCol { grid-column: auto; }
+    }
+
+    body[data-layout="promptRefsLeft"] .cardBody {
+      grid-template-rows: auto auto;
+    }
+    html[lang="he"] body[data-layout="promptRefsLeft"] .cardBody {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+    html[lang="en"] body[data-layout="promptRefsLeft"] .cardBody {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    }
+    body[data-layout="promptRefsLeft"] .mainBlockCol { grid-row: 1 / span 2; }
+    html[lang="he"] body[data-layout="promptRefsLeft"] .mainBlockCol { grid-column: 1; }
+    html[lang="he"] body[data-layout="promptRefsLeft"] .promptBlockCol { grid-column: 2; grid-row: 1; }
+    html[lang="he"] body[data-layout="promptRefsLeft"] .refsBlockCol { grid-column: 2; grid-row: 2; }
+    html[lang="en"] body[data-layout="promptRefsLeft"] .mainBlockCol { grid-column: 2; }
+    html[lang="en"] body[data-layout="promptRefsLeft"] .promptBlockCol { grid-column: 1; grid-row: 1; }
+    html[lang="en"] body[data-layout="promptRefsLeft"] .refsBlockCol { grid-column: 1; grid-row: 2; }
+    @media (max-width: 1080px) {
+      body[data-layout="promptRefsLeft"] .cardBody {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+      body[data-layout="promptRefsLeft"] .mainBlockCol,
+      body[data-layout="promptRefsLeft"] .promptBlockCol,
+      body[data-layout="promptRefsLeft"] .refsBlockCol {
+        grid-column: auto;
+        grid-row: auto;
+      }
+    }
+
+    .block {
+      border: none;
+      background: transparent;
+      border-radius: var(--radius);
+      padding: 0;
+    }
+
+    .blockTitle {
+      font-weight: 700 !important;
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: var(--muted);
+      letter-spacing: 0.2px;
+      font-family: var(--font) !important;
+    }
+    .mediaTitleRow {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+    .mediaResMeta {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-inline-start: 96px;
+    }
+
+    .mainImageArea { display: grid; gap: 12px; }
+
+    .mainImageLayout {
+      display: grid;
+      grid-template-columns: 84px minmax(0, 1fr);
+      gap: 10px;
+      align-items: stretch;
+      min-height: 280px;
+      max-height: min(800px, 100vh);
+    }
+    .mainThumbRail {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 2px;
+      max-height: min(800px, 100vh);
+    }
+    .mainThumbItem,
+    .mainThumbAdd {
+      width: 78px;
+      height: 78px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      flex: 0 0 auto;
+      background: var(--surface);
+      box-shadow: var(--shadow1);
+    }
+    .mainThumbItem {
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+    }
+    .mainThumbItem img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .mainThumbItem .x {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 70%, transparent 30%);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      opacity: 0;
+      transition: opacity 120ms ease;
+      user-select: none;
+      box-shadow: var(--shadow1);
+      z-index: 2;
+    }
+    .mainThumbItem:hover .x { opacity: 1; }
+    .mainThumbItem.active {
+      border-color: color-mix(in srgb, var(--accent) 58%, var(--border) 42%);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent 76%);
+    }
+    .mainThumbAdd {
+      appearance: none;
+      cursor: pointer;
+      color: color-mix(in srgb, var(--accent) 80%, var(--text) 20%);
+      font-weight: 800;
+      font-size: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: color-mix(in srgb, var(--accent) 8%, var(--surface) 92%);
+      border-style: dashed;
+      border-color: color-mix(in srgb, var(--accent) 40%, var(--border) 60%);
+      user-select: none;
+    }
+    .mainThumbAdd:hover {
+      border-color: color-mix(in srgb, var(--accent) 56%, var(--border) 44%);
+    }
+    .mainThumbAdd.isFull {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    @media (max-width: 920px) {
+      .mainImageLayout {
+        grid-template-columns: 1fr;
+        max-height: none;
+      }
+      .mainThumbRail {
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-height: none;
+      }
+    }
+
+    .mainImageBox {
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--bg);
+      min-height: 280px;
+      max-height: min(800px, 100vh);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+    }
+    .mainImageBox:hover {
+      border-color: color-mix(in srgb, var(--accent) 40%, var(--border) 60%);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent 82%);
+    }
+
+    .mainImageBox img {
+      width: 100%;
+      height: auto;
+      max-height: min(800px, 100vh);
+      object-fit: contain;
+      display: block;
+      cursor: zoom-in;
+      background: transparent;
+    }
+
+    .mainImageRemove {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 3;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 82%, transparent 18%);
+      color: var(--text);
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow1);
+      font-weight: 800;
+    }
+    .mainNavBtn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 82%, transparent 18%);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      box-shadow: var(--shadow1);
+    }
+    .mainNavPrev { left: 10px; }
+    .mainNavNext { right: 10px; }
+
+    .dropOverlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: color-mix(in srgb, var(--accent) 14%, rgba(0,0,0,0.30) 86%);
+      color: var(--accentText);
+      font-weight: 800;
+      pointer-events: none;
+    }
+
+    .mainImageBox.dragOver .dropOverlay { display: flex; }
+
+    .mainActions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .refsStrip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 118px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 8px;
+      border-radius: 14px;
+      border: 1px solid color-mix(in srgb, var(--border) 78%, transparent 22%);
+      background: color-mix(in srgb, var(--surface) 75%, transparent 25%);
+      box-shadow: inset 0 1px 0 color-mix(in srgb, var(--surface2) 70%, transparent 30%);
+    }
+    .refsStrip.dragOver {
+      border-color: color-mix(in srgb, var(--accent) 55%, var(--border) 45%);
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface) 88%);
+    }
+    @media (max-width: 720px) {
+      .mediaResMeta { margin-inline-start: 28px; }
+    }
+
+    .refThumb {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--bg);
+      position: relative;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 110px;
+      width: 110px;
+      height: 110px;
+    }
+
+    .refThumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .refThumb .x {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 70%, transparent 30%);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      opacity: 0;
+      transition: opacity 140ms ease;
+      user-select: none;
+      box-shadow: var(--shadow1);
+    }
+
+    .refThumb:hover .x { opacity: 1; }
+
+    .dropZone {
+      border: 1px dashed color-mix(in srgb, var(--border) 75%, transparent 25%);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .refAddTile {
+      appearance: none;
+      padding: 0;
+      border: 1px dashed color-mix(in srgb, var(--accent) 40%, var(--border) 60%);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--accent) 8%, var(--surface) 92%);
+      color: color-mix(in srgb, var(--accent) 80%, var(--text) 20%);
+      box-shadow: var(--shadow1);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 110px;
+      width: 110px;
+      height: 110px;
+      font-size: 48px;
+      line-height: 1;
+      font-weight: 800;
+      user-select: none;
+      transition: filter 120ms ease, border-color 120ms ease, opacity 120ms ease;
+    }
+    .refAddTile:hover {
+      filter: brightness(1.02);
+      border-style: dashed;
+      border-color: color-mix(in srgb, var(--accent) 52%, var(--border) 48%);
+    }
+    .refAddTile.dragOver {
+      border-color: color-mix(in srgb, var(--accent) 55%, var(--border) 45%);
+      background: color-mix(in srgb, var(--accent) 14%, var(--surface) 86%);
+    }
+    .refAddTile.isFull {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .refsHeaderRow {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .dropZone.dragOver {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--border) 55%);
+      background: var(--accentSoft2);
+      color: var(--text);
+    }
+
+    .promptArea textarea {
+      width: 100%;
+      min-height: 280px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 12px;
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.55;
+      resize: vertical;
+      overflow: auto;
+      outline: none;
+      font-family: var(--font) !important;
+    }
+
+    .promptArea textarea::placeholder { color: color-mix(in srgb, var(--muted) 70%, transparent 30%); }
+
+    .miniHelp {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .fileInputHidden { display: none; }
+
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 2000;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow2);
+      display: none;
+      max-width: 440px;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .toast.show { display: block; }
+
+    .present .adminOnly { display: none; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .overlay.open { display: flex; }
+
+    .helpPanel {
+      width: min(520px, 94vw);
+      border-radius: 18px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow2);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .helpTitle {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .helpList {
+      margin: 0;
+      padding-inline-start: 20px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .viewer {
+      width: min(1600px, 99vw);
+      height: min(980px, 97vh);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(32,33,36,0.92);
+      overflow: hidden;
+      box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    [data-theme="light"] .viewer {
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(60,64,67,0.18);
+    }
+
+    .viewerTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: calc(10px * var(--viewerUiScale));
+      padding: calc(10px * var(--viewerUiScale));
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      background: color-mix(in srgb, var(--surface2) 80%, transparent 20%);
+    }
+
+    [data-theme="light"] .viewerTop {
+      border-bottom: 1px solid rgba(60,64,67,0.18);
+    }
+
+    .viewerTitle {
+      font-weight: 800;
+      font-size: calc(16px * var(--viewerUiScale));
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70%;
+    }
+
+    .viewerBtns {
+      display: flex;
+      gap: calc(8px * var(--viewerUiScale));
+      align-items: center;
+    }
+
+    .viewerBtn {
+      border: 1px solid rgba(60,64,67,0.22);
+      background: var(--surface);
+      color: var(--text);
+      padding: calc(8px * var(--viewerUiScale)) calc(10px * var(--viewerUiScale));
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 750;
+      font-size: calc(13px * var(--viewerUiScale));
+      box-shadow: var(--shadow1);
+    }
+    .viewerZoomPct {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: calc(58px * var(--viewerUiScale));
+      padding: calc(8px * var(--viewerUiScale)) calc(10px * var(--viewerUiScale));
+      border-radius: 999px;
+      border: 1px solid rgba(60,64,67,0.22);
+      background: color-mix(in srgb, var(--surface2) 82%, transparent 18%);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: calc(12px * var(--viewerUiScale));
+      user-select: none;
+    }
+
+    .viewerMain {
+      position: relative;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--bg) 85%, rgba(0,0,0,0.08) 15%);
+    }
+
+    .panZoom { position: absolute; inset: 0; cursor: grab; }
+    .panZoom:active { cursor: grabbing; }
+
+    .panZoom img {
+      position: absolute;
+      top: 50%;
+      right: 50%;
+      transform: translate(50%, -50%) scale(1);
+      transform-origin: center center;
+      user-select: none;
+      -webkit-user-drag: none;
+      max-width: none;
+      max-height: none;
+    }
+
+    .settingsOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.32);
+      z-index: 900;
+      display: none;
+    }
+
+    .settingsOverlay.open { display: block; }
+
+    .settingsPanel {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: min(420px, 92vw);
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow2);
+      z-index: 950;
+      transform: translateX(102%);
+      transition: transform 180ms ease;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .settingsPanel.open { transform: translateX(0%); }
+
+    .settingsHead {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .settingsTitle {
+      font-weight: 850;
+      letter-spacing: 0.2px;
+    }
+
+    .settingsBody {
+      padding: 12px;
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .field {
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      border-radius: 16px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .fieldLabel {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.18px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .schemeNav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .schemeNav select {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .schemeNav .btn {
+      flex: 0 0 auto;
+      width: 40px;
+      padding-inline: 0;
+      text-align: center;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      font-weight: 650;
+    }
+
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow1);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      user-select: none;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 5px;
+      background: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--border) 60%, transparent 40%);
+    }
+  </style>
+</head>
+
+<body data-theme="light" data-layout="promptRefsLeft">
+  <div class="uiScaleWrap">
+    <div class="topbar">
+      <div class="topbarInner">
+        <div class="presentSlot">
+          <button class="btn btnTonal" id="presentBtn">מצב מצגת</button>
+        </div>
+
+        <div class="controls adminOnly">
+          <button class="btn" id="langToggleBtn">English</button>
+          <button class="btn btnPrimary" id="addCardBtn">הוסף</button>
+          <button class="btn" id="loadBtn">טען</button>
+          <button class="btn" id="saveBtn">שמור</button>
+          <button class="btn" id="helpBtn">Help</button>
+          <button class="btn" id="settingsBtn">הגדרות</button>
+
+          <div class="zoomBox">
+            <div class="zoomLabel" id="uiScaleLabel">UI Scale</div>
+            <button class="btn btnSmall" id="uiScaleDownBtn" type="button">-</button>
+            <select id="uiZoomSelect" class="scaleSelect"></select>
+            <button class="btn btnSmall" id="uiScaleUpBtn" type="button">+</button>
+            <div class="zoomLabel" id="uiZoomLabel">100%</div>
+          </div>
+
+          <div class="statusRow" id="statusRow" title="סטטוס שמירה">
+            <div class="dot" id="dirtyDot"></div>
+            <div class="statusText" id="statusText">נשמר</div>
+          </div>
+        </div>
+
+        <div class="brand">
+          <img class="brandIcon" src="asssets/logo%201.svg" alt="" aria-hidden="true" />
+          <div class="brandTitle" id="brandTitle">Image Deck</div>
+          <div class="brandOwner">by Misha Kerch</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap" id="app">
+      <div class="hintRow hidden" id="hintRow"></div>
+      <div class="cards" id="cards"></div>
+      <div class="addCardBottomWrap adminOnly">
+        <button class="btn btnPrimary" id="addCardBottomBtn">הוסף</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="viewer" role="dialog" aria-modal="true">
+      <div class="viewerTop">
+        <div class="viewerTitle" id="viewerTitle">תצוגה</div>
+        <div class="viewerBtns">
+          <button class="viewerBtn" id="viewerPrevBtn">◀</button>
+          <button class="viewerBtn" id="viewerNextBtn">▶</button>
+          <button class="viewerBtn" id="viewer100Btn">100%</button>
+          <div class="viewerZoomPct" id="viewerZoomPct">100%</div>
+          <button class="viewerBtn" id="viewerResetBtn">איפוס</button>
+          <button class="viewerBtn" id="viewerOpenBtn">פתח בטאב</button>
+          <button class="viewerBtn" id="viewerCloseBtn">סגור</button>
+        </div>
+      </div>
+      <div class="viewerMain">
+        <div class="panZoom" id="panZoom"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="helpOverlay" aria-hidden="true">
+    <div class="helpPanel">
+      <div class="helpTitle" id="helpTitle">עזרה</div>
+      <ol class="helpList" id="helpList"></ol>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="btn btnSmall" id="helpCloseBtn">סגור</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settingsOverlay adminOnly" id="settingsOverlay"></div>
+
+  <aside class="settingsPanel adminOnly" id="settingsPanel" aria-hidden="true">
+    <div class="settingsHead">
+      <div class="settingsTitle" id="settingsTitle">הגדרות</div>
+      <button class="btn btnSmall" id="settingsCloseBtn">סגור</button>
+    </div>
+
+    <div class="settingsBody">
+      <div class="field">
+        <div class="fieldLabel" id="themeLabel">ערכת נושא</div>
+        <div class="row">
+          <button class="btn btnSmall btnTonal" id="themeToggleBtn">החלף בהיר או כהה</button>
+          <div class="pill"><span class="swatch"></span><span id="schemeNamePill">כחול גוגל</span></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="fieldLabel" id="schemeLabel">סכמת צבעים</div>
+        <div class="schemeNav">
+          <button class="btn btnSmall" id="schemePrevBtn" type="button" aria-label="סכמה קודמת">◀</button>
+          <select id="schemeSelect">
+            <option value="googleBlue">כחול גוגל</option>
+            <option value="materialIndigo">אינדיגו</option>
+            <option value="emerald">אמרלד</option>
+            <option value="sunsetOrange">כתום שקיעה</option>
+            <option value="mono">מונוכרום</option>
+          </select>
+          <button class="btn btnSmall" id="schemeNextBtn" type="button" aria-label="סכמה הבאה">▶</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="fieldLabel" id="uiSizeLabel">UI Scale</div>
+        <div class="row">
+          <div class="zoomBox" style="box-shadow:none;">
+            <div class="zoomLabel">UI Scale</div>
+            <button class="btn btnSmall" id="uiScaleDownBtn2" type="button">-</button>
+            <select id="uiZoomSelect2" class="scaleSelect"></select>
+            <button class="btn btnSmall" id="uiScaleUpBtn2" type="button">+</button>
+            <div class="zoomLabel" id="uiZoomLabel2">100%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="fieldLabel" id="focusNewCardLabel">פוקוס לכרטיסיה חדשה</div>
+        <label class="row" style="justify-content:flex-start; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="focusNewCardToggle" />
+          <span id="focusNewCardHint">מעבר אוטומטי לכרטיסיה חדשה אחרי הוספה</span>
+        </label>
+      </div>
+
+      <div class="field">
+        <div class="fieldLabel" id="layoutLabel">פריסה</div>
+        <select id="layoutSelect">
+          <option value="promptRefsLeft">עיצוב 1: פרומפט + רפרנסים בשמאל, ראשית בימין</option>
+          <option value="classic">עיצוב 2: קלאס: ראשית | רפרנסים | פורמט</option>
+        </select>
+      </div>
+
+      <div class="hintRow" id="settingsHint" style="margin-top:0;"></div>
+    </div>
+
+    </aside>
+
+  <div class="toast" id="toast"></div>
+
+  <input class="fileInputHidden" id="mainFileInput" type="file" accept="image/*" multiple />
+  <input class="fileInputHidden" id="refFileInput" type="file" accept="image/*" multiple />
+  <input class="fileInputHidden" id="jsonFileInput" type="file" accept="application/json,.json" />
+
+  <script>
+    const SCHEMES = {
+      googleBlue: { name: { he: "כחול גוגל", en: "Google Blue" }, accent: "#1a73e8" },
+      materialIndigo: { name: { he: "אינדיגו", en: "Material Indigo" }, accent: "#3f51b5" },
+      emerald: { name: { he: "אמרלד", en: "Emerald" }, accent: "#10b981" },
+      sunsetOrange: { name: { he: "כתום שקיעה", en: "Sunset Orange" }, accent: "#f97316" },
+      mono: { name: { he: "מונוכרום", en: "Minimal Mono" }, accent: "#5f6368" },
+    };
+    const SCHEME_KEYS = Object.keys(SCHEMES);
+    const CACHE_DB_NAME = "imageDeckLocalCache";
+    const CACHE_STORE_NAME = "kv";
+    const CACHE_LAST_DATA_KEY = "lastData";
+    const CACHE_JSON_HANDLE_KEY = "jsonFileHandle";
+    const CACHE_ASSET_DIR_HANDLE_KEY = "assetDirHandle";
+    const PROJECT_CACHE_SCOPE = (() => {
+      try { return new URL(".", window.location.href).href; } catch { return String(window.location.href || "default"); }
+    })();
+    const MAX_MAIN_IMAGES = 20;
+    const MAX_REF_IMAGES = 20;
+
+    function scopedCacheKey(baseKey) {
+      return String(baseKey) + "::" + PROJECT_CACHE_SCOPE;
+    }
+
+    const I18N = {
+      he: {
+        appTitle: "Image Deck",
+        langToggle: "English",
+        add: "הוסף",
+        load: "טען",
+        save: "שמור",
+        present: "מצב מצגת",
+        admin: "מצב עריכה",
+        help: "עזרה",
+        helpTitle: "עזרה מהירה",
+        settings: "הגדרות",
+        uiScale: "UI Scale",
+        saved: "נשמר",
+        unsaved: "לא נשמר",
+        statusTitle: "סטטוס שמירה",
+        hint1: "גרירת תמונה ראשית למסגרת הגדולה",
+        hint2: "גרירת רפרנסים לאזור הרפרנסים",
+        hint3: "לחיצה על תמונה פותחת תצוגה עם זום ופאן",
+        hint4: "Esc סוגר תצוגה ויוצא ממצב מצגת",
+        viewer: "תצוגה",
+        viewerPrev: "קודם",
+        viewerNext: "הבא",
+        viewer100: "100%",
+        reset: "איפוס",
+        openTab: "פתח בטאב",
+        close: "סגור",
+        theme: "ערכת נושא",
+        toggleTheme: "החלף בהיר או כהה",
+        scheme: "סכמת צבעים",
+        schemePrev: "סכמה קודמת",
+        schemeNext: "סכמה הבאה",
+        themeLight: "בהיר",
+        themeDark: "כהה",
+        settingsHint: "כל שינוי נשמר אוטומטית",
+        focusNewCard: "פוקוס לכרטיסיה חדשה",
+        focusNewCardHint: "מעבר אוטומטי לכרטיסיה חדשה אחרי הוספה",
+        layout: "פריסה",
+        layoutClassic: "עיצוב 2: קלאס: ראשית | רפרנסים | פורמט",
+        layoutPromptRefsLeft: "עיצוב 1: פרומפט + רפרנסים בשמאל, ראשית בימין",
+        titlePlaceholder: "כותרת",
+        up: "↑",
+        down: "↓",
+        delete: "מחק",
+        deleteMain: "מחק תמונה ראשית",
+        deleteConfirm: "למחוק את הכרטיס הזה?",
+        mainImageTitle: "תמונה ראשית",
+        mainBlock: "תמונה ראשית ורפרנסים",
+        refsPanelTitle: "רפרנסים",
+        dropMain: "שחרר תמונה ראשית",
+        dropMainHelp: "גרור או לחץ כדי לבחור תמונה ראשית",
+        addMainImages: "הוסף תמונות ראשיות",
+        refsTitle: "גריד רפרנסים עד 20",
+        refsDrop: "רפרנסים",
+        refsUploadHint: "עד 20 תמונות",
+        remove: "הסר",
+        prompt: "פרומפט",
+        promptPlaceholder: "הדבק כאן פרומפט",
+        miniHelp: "",
+        onlyImages: "נתמכות רק תמונות",
+        noImages: "לא נמצאו תמונות",
+        refsLimitReached: "אפשר להעלות עד 20 תמונות רפרנס",
+        mainImagesLimitReached: "אפשר להעלות עד 20 תמונות ראשיות",
+        mainUpdated: "התמונה הראשית עודכנה",
+        mainImagesUpdated: "התמונות הראשיות עודכנו",
+        refsUpdated: "הרפרנסים עודכנו",
+        cardAdded: "כרטיס נוסף",
+        cardRemoved: "כרטיס נמחק",
+        orderUpdated: "הסדר עודכן",
+        presentOn: "מצב מצגת הופעל",
+        presentOff: "מצב עריכה הופעל",
+        loaded: "נטען",
+        loadFailed: "הטעינה נכשלה",
+        pickAssetsFolder: "בחר תיקיית פרויקט לשמירת התמונות",
+        assetsSaveFailed: "שמירת קבצי התמונות נכשלה",
+      },
+      en: {
+        appTitle: "Image Deck",
+        langToggle: "עברית",
+        add: "Add",
+        load: "Load",
+        save: "Save",
+        present: "Present Mode",
+        admin: "Admin Mode",
+        help: "Help",
+        helpTitle: "Quick Help",
+        settings: "Settings",
+        uiScale: "UI Scale",
+        saved: "Saved",
+        unsaved: "Unsaved",
+        statusTitle: "Save status",
+        hint1: "Drag a main image into the big frame",
+        hint2: "Drag references into the references area",
+        hint3: "Click any image to open viewer with zoom and pan",
+        hint4: "Esc closes viewer and exits Present mode",
+        viewer: "Viewer",
+        viewerPrev: "Prev",
+        viewerNext: "Next",
+        viewer100: "100%",
+        reset: "Reset",
+        openTab: "Open Tab",
+        close: "Close",
+        theme: "Theme",
+        toggleTheme: "Toggle Light or Dark",
+        scheme: "Color scheme",
+        schemePrev: "Previous scheme",
+        schemeNext: "Next scheme",
+        themeLight: "Light",
+        themeDark: "Dark",
+        settingsHint: "Every setting is saved automatically",
+        focusNewCard: "Focus New Card",
+        focusNewCardHint: "Automatically jump to new card after add",
+        layout: "Layout",
+        layoutClassic: "Design 2: Classic: Main | References | Prompt",
+        layoutPromptRefsLeft: "Design 1: Prompt + references left, main image right",
+        titlePlaceholder: "Title",
+        up: "↑",
+        down: "↓",
+        delete: "Delete",
+        deleteMain: "Remove main image",
+        deleteConfirm: "Delete this card?",
+        mainImageTitle: "Main image",
+        mainBlock: "Main image and references",
+        refsPanelTitle: "References",
+        dropMain: "Drop main image",
+        dropMainHelp: "Drag or click to choose a main image",
+        addMainImages: "Add main images",
+        refsTitle: "References grid max 20",
+        refsDrop: "References",
+        refsUploadHint: "Up to 20 images",
+        remove: "Remove",
+        prompt: "Prompt",
+        promptPlaceholder: "Paste prompt here",
+        miniHelp: "",
+        onlyImages: "Only images are supported",
+        noImages: "No images found",
+        refsLimitReached: "You can upload up to 20 reference images",
+        mainImagesLimitReached: "You can upload up to 20 main images",
+        mainUpdated: "Main image updated",
+        mainImagesUpdated: "Main images updated",
+        refsUpdated: "References updated",
+        cardAdded: "Card added",
+        cardRemoved: "Card removed",
+        orderUpdated: "Order updated",
+        presentOn: "Present mode on",
+        presentOff: "Admin mode on",
+        loaded: "Loaded",
+        loadFailed: "Load failed",
+        pickAssetsFolder: "Choose project folder to save image files",
+        assetsSaveFailed: "Saving image files failed",
+      },
+    };
+
+    const state = {
+      cards: [],
+      present: false,
+      isDirty: false,
+      fileHandle: null,
+      assetDirHandle: null,
+      prefs: {
+        theme: "light",
+        schemeKey: "googleBlue",
+        uiScale: 1,
+        lang: "he",
+        focusNewCard: true,
+        layout: "promptRefsLeft",
+      },
+      viewer: {
+        open: false,
+        title: "",
+        src: "",
+        items: [],
+        index: 0,
+        scale: 1,
+        fitScale: 1,
+        minScale: 0.2,
+        maxScale: 8,
+        x: 0,
+        y: 0,
+        dragging: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        baseX: 0,
+        baseY: 0,
+      },
+      settingsOpen: false,
+    };
+
+    const el = {
+      body: document.body,
+      brandTitle: document.getElementById("brandTitle"),
+      langToggleBtn: document.getElementById("langToggleBtn"),
+      hintRow: document.getElementById("hintRow"),
+      settingsHint: document.getElementById("settingsHint"),
+      helpBtn: document.getElementById("helpBtn"),
+      helpOverlay: document.getElementById("helpOverlay"),
+      helpTitle: document.getElementById("helpTitle"),
+      helpList: document.getElementById("helpList"),
+      helpCloseBtn: document.getElementById("helpCloseBtn"),
+      addCardBottomBtn: document.getElementById("addCardBottomBtn"),
+      statusRow: document.getElementById("statusRow"),
+      uiScaleLabel: document.getElementById("uiScaleLabel"),
+      settingsTitle: document.getElementById("settingsTitle"),
+      themeLabel: document.getElementById("themeLabel"),
+      schemeLabel: document.getElementById("schemeLabel"),
+      uiSizeLabel: document.getElementById("uiSizeLabel"),
+      focusNewCardLabel: document.getElementById("focusNewCardLabel"),
+      focusNewCardHint: document.getElementById("focusNewCardHint"),
+      focusNewCardToggle: document.getElementById("focusNewCardToggle"),
+      layoutLabel: document.getElementById("layoutLabel"),
+      layoutSelect: document.getElementById("layoutSelect"),
+      cards: document.getElementById("cards"),
+      addCardBtn: document.getElementById("addCardBtn"),
+      saveBtn: document.getElementById("saveBtn"),
+      loadBtn: document.getElementById("loadBtn"),
+      presentBtn: document.getElementById("presentBtn"),
+      settingsBtn: document.getElementById("settingsBtn"),
+      uiZoomSelect: document.getElementById("uiZoomSelect"),
+      uiScaleDownBtn: document.getElementById("uiScaleDownBtn"),
+      uiScaleUpBtn: document.getElementById("uiScaleUpBtn"),
+      uiZoomLabel: document.getElementById("uiZoomLabel"),
+      dirtyDot: document.getElementById("dirtyDot"),
+      statusText: document.getElementById("statusText"),
+      toast: document.getElementById("toast"),
+      overlay: document.getElementById("overlay"),
+      viewerTitle: document.getElementById("viewerTitle"),
+      viewerPrevBtn: document.getElementById("viewerPrevBtn"),
+      viewerNextBtn: document.getElementById("viewerNextBtn"),
+      viewer100Btn: document.getElementById("viewer100Btn"),
+      viewerZoomPct: document.getElementById("viewerZoomPct"),
+      viewerCloseBtn: document.getElementById("viewerCloseBtn"),
+      viewerResetBtn: document.getElementById("viewerResetBtn"),
+      viewerOpenBtn: document.getElementById("viewerOpenBtn"),
+      panZoom: document.getElementById("panZoom"),
+      mainFileInput: document.getElementById("mainFileInput"),
+      refFileInput: document.getElementById("refFileInput"),
+      jsonFileInput: document.getElementById("jsonFileInput"),
+
+      settingsOverlay: document.getElementById("settingsOverlay"),
+      settingsPanel: document.getElementById("settingsPanel"),
+      settingsCloseBtn: document.getElementById("settingsCloseBtn"),
+      themeToggleBtn: document.getElementById("themeToggleBtn"),
+      schemePrevBtn: document.getElementById("schemePrevBtn"),
+      schemeSelect: document.getElementById("schemeSelect"),
+      schemeNextBtn: document.getElementById("schemeNextBtn"),
+      uiZoomSelect2: document.getElementById("uiZoomSelect2"),
+      uiScaleDownBtn2: document.getElementById("uiScaleDownBtn2"),
+      uiScaleUpBtn2: document.getElementById("uiScaleUpBtn2"),
+      uiZoomLabel2: document.getElementById("uiZoomLabel2"),
+      schemeNamePill: document.getElementById("schemeNamePill"),
+    };
+
+    function t(key) {
+      return (I18N[state.prefs.lang] && I18N[state.prefs.lang][key]) || I18N.he[key] || key;
+    }
+
+    function setSchemeOptionsText() {
+      for (const opt of el.schemeSelect.options) {
+        const scheme = SCHEMES[opt.value];
+        if (!scheme) continue;
+        opt.textContent = scheme.name[state.prefs.lang] || scheme.name.he;
+      }
+    }
+
+    function setLayoutOptionsText() {
+      for (const opt of el.layoutSelect.options) {
+        if (opt.value === "classic") opt.textContent = t("layoutClassic");
+        if (opt.value === "promptRefsLeft") opt.textContent = t("layoutPromptRefsLeft");
+      }
+    }
+
+    function applyLanguage() {
+      const isHe = state.prefs.lang === "he";
+      document.documentElement.lang = isHe ? "he" : "en";
+      document.documentElement.dir = isHe ? "rtl" : "ltr";
+      document.title = t("appTitle");
+      el.brandTitle.textContent = t("appTitle");
+      el.langToggleBtn.textContent = t("langToggle");
+      el.addCardBtn.textContent = t("add");
+      el.addCardBottomBtn.textContent = t("add");
+      el.loadBtn.textContent = t("load");
+      el.saveBtn.textContent = t("save");
+      el.presentBtn.textContent = state.present ? t("admin") : t("present");
+      el.helpBtn.textContent = t("help");
+      el.helpTitle.textContent = t("helpTitle");
+      el.settingsBtn.textContent = t("settings");
+      el.uiScaleLabel.textContent = t("uiScale");
+      el.statusRow.title = t("statusTitle");
+      el.viewerResetBtn.textContent = t("reset");
+      el.viewerPrevBtn.textContent = t("viewerPrev");
+      el.viewerNextBtn.textContent = t("viewerNext");
+      el.viewer100Btn.textContent = t("viewer100");
+      el.viewerOpenBtn.textContent = t("openTab");
+      el.viewerCloseBtn.textContent = t("close");
+      if (!state.viewer.open) el.viewerTitle.textContent = t("viewer");
+      el.settingsTitle.textContent = t("settings");
+      el.settingsCloseBtn.textContent = t("close");
+      el.themeLabel.textContent = t("theme");
+      el.themeToggleBtn.textContent = t("toggleTheme");
+      el.schemeLabel.textContent = t("scheme");
+      el.schemePrevBtn.textContent = isHe ? "▶" : "◀";
+      el.schemeNextBtn.textContent = isHe ? "◀" : "▶";
+      el.schemePrevBtn.title = t("schemePrev");
+      el.schemeNextBtn.title = t("schemeNext");
+      el.schemePrevBtn.setAttribute("aria-label", t("schemePrev"));
+      el.schemeNextBtn.setAttribute("aria-label", t("schemeNext"));
+      el.uiSizeLabel.textContent = t("uiScale");
+      el.focusNewCardLabel.textContent = t("focusNewCard");
+      el.focusNewCardHint.textContent = t("focusNewCardHint");
+      el.focusNewCardToggle.checked = !!state.prefs.focusNewCard;
+      el.layoutLabel.textContent = t("layout");
+      el.settingsHint.textContent = t("settingsHint");
+      el.helpList.innerHTML = "";
+      [t("hint1"), t("hint2"), t("hint3"), t("hint4")].forEach((line) => {
+        const li = document.createElement("li");
+        li.textContent = line;
+        el.helpList.appendChild(li);
+      });
+      setSchemeOptionsText();
+      setLayoutOptionsText();
+      setTheme(state.prefs.theme);
+      setScheme(state.prefs.schemeKey);
+      updateDirtyUI();
+      render();
+    }
+
+    function fillScaleSelects() {
+      const values = [];
+      for (let pct = 80; pct <= 200; pct += 10) values.push(pct);
+      [el.uiZoomSelect, el.uiZoomSelect2].forEach((sel) => {
+        sel.innerHTML = "";
+        values.forEach((pct) => {
+          const opt = document.createElement("option");
+          opt.value = String(pct);
+          opt.textContent = pct + "%";
+          sel.appendChild(opt);
+        });
+      });
+    }
+
+    function uid() {
+      return "c" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
+
+    const imageSizeCache = new Map();
+
+    function getImageSize(src) {
+      if (!src) return Promise.resolve(null);
+      if (imageSizeCache.has(src)) return Promise.resolve(imageSizeCache.get(src));
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const size = { w: img.naturalWidth || 0, h: img.naturalHeight || 0 };
+          imageSizeCache.set(src, size);
+          resolve(size);
+        };
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    function sizeText(size) {
+      if (!size || !size.w || !size.h) return "";
+      return size.w + "x" + size.h + "px";
+    }
+
+    function clamp(n, a, b) {
+      return Math.max(a, Math.min(b, n));
+    }
+
+    function toast(msg) {
+      el.toast.textContent = msg;
+      el.toast.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.toast.classList.remove("show"), 2200);
+    }
+
+    function markDirty() {
+      if (state.isDirty) return;
+      state.isDirty = true;
+      updateDirtyUI();
+    }
+
+    function clearDirty() {
+      state.isDirty = false;
+      updateDirtyUI();
+    }
+
+    function updateDirtyUI() {
+      el.dirtyDot.classList.toggle("dotDirty", state.isDirty);
+      el.statusText.textContent = state.isDirty ? t("unsaved") : t("saved");
+    }
+
+    function setTheme(theme) {
+      state.prefs.theme = theme;
+      document.documentElement.setAttribute("data-theme", theme);
+      el.body.setAttribute("data-theme", theme);
+    }
+
+    function setAccent(hex) {
+      document.documentElement.style.setProperty("--accent", hex);
+      document.documentElement.style.setProperty("--accentSoft", hexToRgba(hex, 0.14));
+      document.documentElement.style.setProperty("--accentSoft2", hexToRgba(hex, 0.10));
+    }
+
+    function hexToRgba(hex, a) {
+      const h = String(hex).replace("#", "").trim();
+      const full = h.length === 3 ? h.split("").map(x => x + x).join("") : h;
+      const r = parseInt(full.slice(0, 2), 16) || 0;
+      const g = parseInt(full.slice(2, 4), 16) || 0;
+      const b = parseInt(full.slice(4, 6), 16) || 0;
+      return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+    }
+
+    function setScheme(key) {
+      const scheme = SCHEMES[key] || SCHEMES.googleBlue;
+      state.prefs.schemeKey = key in SCHEMES ? key : "googleBlue";
+      setAccent(scheme.accent);
+      el.schemeNamePill.textContent = scheme.name[state.prefs.lang] || scheme.name.he;
+      el.schemeSelect.value = state.prefs.schemeKey;
+    }
+
+    function setLayout(layout) {
+      const safeLayout = layout === "classic" ? "classic" : "promptRefsLeft";
+      state.prefs.layout = safeLayout;
+      el.body.setAttribute("data-layout", safeLayout);
+      el.layoutSelect.value = safeLayout;
+    }
+
+    function setUiScale(scale) {
+      state.prefs.uiScale = clamp(Number(scale), 0.8, 2);
+      document.documentElement.style.setProperty("--uiScale", String(state.prefs.uiScale));
+      document.documentElement.style.setProperty("--viewerUiScale", String(state.prefs.uiScale));
+      const pct = Math.round(state.prefs.uiScale * 100 / 10) * 10;
+      state.prefs.uiScale = pct / 100;
+      document.documentElement.style.setProperty("--uiScale", String(state.prefs.uiScale));
+      document.documentElement.style.setProperty("--viewerUiScale", String(state.prefs.uiScale));
+      el.uiZoomLabel.textContent = pct + "%";
+      el.uiZoomLabel2.textContent = pct + "%";
+      el.uiZoomSelect.value = String(pct);
+      el.uiZoomSelect2.value = String(pct);
+    }
+
+    function persistPrefsToLocalStorage() {
+      localStorage.setItem("aiLessonStudio.prefs", JSON.stringify(state.prefs));
+    }
+
+    function loadPrefsFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem("aiLessonStudio.prefs");
+        if (!raw) return;
+        const prefs = JSON.parse(raw);
+        if (prefs && (prefs.theme === "light" || prefs.theme === "dark")) state.prefs.theme = prefs.theme;
+        if (prefs && typeof prefs.schemeKey === "string") state.prefs.schemeKey = prefs.schemeKey;
+        if (prefs && Number.isFinite(prefs.uiScale)) state.prefs.uiScale = clamp(Number(prefs.uiScale), 0.8, 2);
+        if (prefs && (prefs.lang === "he" || prefs.lang === "en")) state.prefs.lang = prefs.lang;
+        if (prefs && typeof prefs.focusNewCard === "boolean") state.prefs.focusNewCard = prefs.focusNewCard;
+        if (prefs && (prefs.layout === "classic" || prefs.layout === "promptRefsLeft")) state.prefs.layout = prefs.layout;
+      } catch {}
+    }
+
+    function applyPrefs(prefs) {
+      setTheme(prefs.theme);
+      setScheme(prefs.schemeKey);
+      setUiScale(prefs.uiScale);
+      setLayout(prefs.layout);
+    }
+
+    let dbPromise = null;
+
+    function openCacheDb() {
+      if (dbPromise) return dbPromise;
+      if (!("indexedDB" in window)) return Promise.resolve(null);
+      dbPromise = new Promise((resolve) => {
+        try {
+          const req = indexedDB.open(CACHE_DB_NAME, 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(CACHE_STORE_NAME)) {
+              db.createObjectStore(CACHE_STORE_NAME);
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+        } catch {
+          resolve(null);
+        }
+      });
+      return dbPromise;
+    }
+
+    function txDone(tx) {
+      return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onabort = () => reject(tx.error || new Error("tx abort"));
+        tx.onerror = () => reject(tx.error || new Error("tx error"));
+      });
+    }
+
+    async function cacheDataObject(obj) {
+      try {
+        const db = await openCacheDb();
+        if (!db) return;
+        const tx = db.transaction(CACHE_STORE_NAME, "readwrite");
+        tx.objectStore(CACHE_STORE_NAME).put(obj, scopedCacheKey(CACHE_LAST_DATA_KEY));
+        await txDone(tx);
+      } catch {}
+    }
+
+    async function readCachedDataObject() {
+      try {
+        const db = await openCacheDb();
+        if (!db) return null;
+        const tx = db.transaction(CACHE_STORE_NAME, "readonly");
+        const req = tx.objectStore(CACHE_STORE_NAME).get(scopedCacheKey(CACHE_LAST_DATA_KEY));
+        const val = await new Promise((resolve) => {
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+        return val && typeof val === "object" ? val : null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function cacheJsonFileHandle(handle) {
+      try {
+        const db = await openCacheDb();
+        if (!db) return;
+        const tx = db.transaction(CACHE_STORE_NAME, "readwrite");
+        tx.objectStore(CACHE_STORE_NAME).put(handle || null, scopedCacheKey(CACHE_JSON_HANDLE_KEY));
+        await txDone(tx);
+      } catch {}
+    }
+
+    async function readCachedJsonFileHandle() {
+      try {
+        const db = await openCacheDb();
+        if (!db) return null;
+        const tx = db.transaction(CACHE_STORE_NAME, "readonly");
+        const req = tx.objectStore(CACHE_STORE_NAME).get(scopedCacheKey(CACHE_JSON_HANDLE_KEY));
+        const val = await new Promise((resolve) => {
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+        return val || null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function cacheAssetDirHandle(handle) {
+      try {
+        const db = await openCacheDb();
+        if (!db) return;
+        const tx = db.transaction(CACHE_STORE_NAME, "readwrite");
+        tx.objectStore(CACHE_STORE_NAME).put(handle || null, scopedCacheKey(CACHE_ASSET_DIR_HANDLE_KEY));
+        await txDone(tx);
+      } catch {}
+    }
+
+    async function readCachedAssetDirHandle() {
+      try {
+        const db = await openCacheDb();
+        if (!db) return null;
+        const tx = db.transaction(CACHE_STORE_NAME, "readonly");
+        const req = tx.objectStore(CACHE_STORE_NAME).get(scopedCacheKey(CACHE_ASSET_DIR_HANDLE_KEY));
+        const val = await new Promise((resolve) => {
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+        return val || null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function restoreCachedJsonFileHandle() {
+      if (!("showSaveFilePicker" in window)) return;
+      const handle = await readCachedJsonFileHandle();
+      if (handle) state.fileHandle = handle;
+    }
+
+    async function restoreCachedAssetDirHandle() {
+      if (!("showDirectoryPicker" in window)) return;
+      const handle = await readCachedAssetDirHandle();
+      if (handle) state.assetDirHandle = handle;
+    }
+
+    async function ensureWritableJsonFileHandle() {
+      if (!("showSaveFilePicker" in window)) return null;
+      let handle = state.fileHandle;
+      if (!handle) {
+        handle = await readCachedJsonFileHandle();
+        if (handle) state.fileHandle = handle;
+      }
+      if (!handle) return null;
+
+      try {
+        if ("queryPermission" in handle) {
+          let perm = await handle.queryPermission({ mode: "readwrite" });
+          if (perm !== "granted" && "requestPermission" in handle) {
+            perm = await handle.requestPermission({ mode: "readwrite" });
+          }
+          if (perm !== "granted") return null;
+        }
+        return handle;
+      } catch {
+        return null;
+      }
+    }
+
+    async function ensureWritableAssetDirHandle(promptIfMissing) {
+      let handle = state.assetDirHandle;
+      if (!handle) {
+        handle = await readCachedAssetDirHandle();
+        if (handle) state.assetDirHandle = handle;
+      }
+      if (handle) {
+        try {
+          if ("queryPermission" in handle) {
+            let perm = await handle.queryPermission({ mode: "readwrite" });
+            if (perm !== "granted" && "requestPermission" in handle) {
+              perm = await handle.requestPermission({ mode: "readwrite" });
+            }
+            if (perm === "granted") return handle;
+          } else {
+            return handle;
+          }
+        } catch {}
+      }
+
+      if (!promptIfMissing || !("showDirectoryPicker" in window)) return null;
+      try {
+        const picked = await window.showDirectoryPicker({ mode: "readwrite" });
+        if ("queryPermission" in picked) {
+          let perm = await picked.queryPermission({ mode: "readwrite" });
+          if (perm !== "granted" && "requestPermission" in picked) {
+            perm = await picked.requestPermission({ mode: "readwrite" });
+          }
+          if (perm !== "granted") return null;
+        }
+        state.assetDirHandle = picked;
+        void cacheAssetDirHandle(picked);
+        return picked;
+      } catch {
+        return null;
+      }
+    }
+
+    function openSettings() {
+      if (state.present) return;
+      state.settingsOpen = true;
+      setUiScale(state.prefs.uiScale);
+      setScheme(state.prefs.schemeKey);
+      el.settingsOverlay.classList.add("open");
+      el.settingsPanel.classList.add("open");
+      el.settingsPanel.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSettings() {
+      state.settingsOpen = false;
+      el.settingsOverlay.classList.remove("open");
+      el.settingsPanel.classList.remove("open");
+      el.settingsPanel.setAttribute("aria-hidden", "true");
+    }
+
+    function openHelp() {
+      el.helpOverlay.classList.add("open");
+      el.helpOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeHelp() {
+      el.helpOverlay.classList.remove("open");
+      el.helpOverlay.setAttribute("aria-hidden", "true");
+    }
+
+    function toggleThemeNow() {
+      state.prefs.theme = state.prefs.theme === "dark" ? "light" : "dark";
+      applyPrefs(state.prefs);
+      persistPrefsToLocalStorage();
+    }
+
+    function updateSchemeNow(value) {
+      state.prefs.schemeKey = value in SCHEMES ? value : "googleBlue";
+      applyPrefs(state.prefs);
+      persistPrefsToLocalStorage();
+    }
+
+    function stepScheme(delta) {
+      if (!SCHEME_KEYS.length) return;
+      let idx = SCHEME_KEYS.indexOf(state.prefs.schemeKey);
+      if (idx < 0) idx = 0;
+      const next = (idx + delta + SCHEME_KEYS.length) % SCHEME_KEYS.length;
+      updateSchemeNow(SCHEME_KEYS[next]);
+    }
+
+    function updateScaleNow(pct) {
+      state.prefs.uiScale = clamp(Number(pct) / 100, 0.8, 2);
+      applyPrefs(state.prefs);
+      persistPrefsToLocalStorage();
+    }
+
+    function updateLayoutNow(layout) {
+      state.prefs.layout = layout;
+      applyPrefs(state.prefs);
+      persistPrefsToLocalStorage();
+      render();
+    }
+
+    function stepScale(deltaPct) {
+      const current = Math.round(state.prefs.uiScale * 100);
+      const next = clamp(current + deltaPct, 80, 200);
+      updateScaleNow(next);
+    }
+
+    async function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Read failed"));
+        reader.onload = () => resolve(String(reader.result));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function isDataUrl(src) {
+      return typeof src === "string" && src.startsWith("data:");
+    }
+
+    function sanitizePathPart(input) {
+      return String(input || "")
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 80);
+    }
+
+    function dataUrlToBlobInfo(src) {
+      if (!isDataUrl(src)) return null;
+      const commaIdx = src.indexOf(",");
+      if (commaIdx < 0) return null;
+      const header = src.slice(0, commaIdx);
+      const body = src.slice(commaIdx + 1);
+      const mimeMatch = /^data:([^;]+)/i.exec(header);
+      const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+      const isBase64 = /;base64/i.test(header);
+      const binary = isBase64 ? atob(body) : decodeURIComponent(body);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return { blob: new Blob([bytes], { type: mime }), mime };
+    }
+
+    function extFromMime(mime) {
+      const m = String(mime || "").toLowerCase();
+      if (m.includes("png")) return "png";
+      if (m.includes("jpeg") || m.includes("jpg")) return "jpg";
+      if (m.includes("webp")) return "webp";
+      if (m.includes("gif")) return "gif";
+      if (m.includes("bmp")) return "bmp";
+      if (m.includes("svg")) return "svg";
+      if (m.includes("avif")) return "avif";
+      return "bin";
+    }
+
+    async function writeBlobToDirectoryPath(rootDirHandle, relativePath, blob) {
+      if (!rootDirHandle || !relativePath || !blob) throw new Error("bad-asset-write-input");
+      const parts = String(relativePath).replace(/\\/g, "/").split("/").filter(Boolean);
+      if (!parts.length) throw new Error("bad-asset-path");
+      let dir = rootDirHandle;
+      for (let i = 0; i < parts.length - 1; i++) {
+        dir = await dir.getDirectoryHandle(parts[i], { create: true });
+      }
+      const fileName = parts[parts.length - 1];
+      const fileHandle = await dir.getFileHandle(fileName, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    }
+
+    function buildAssetFolder(card) {
+      const base = sanitizePathPart(card && card.title ? card.title : "") || (card && card.id ? String(card.id) : "card");
+      return "Gallery/" + base;
+    }
+
+    async function materializeImageSrc(src, basePathNoExt, assetDirHandle) {
+      if (!isDataUrl(src)) return src;
+      const info = dataUrlToBlobInfo(src);
+      if (!info || !info.blob) return src;
+      const ext = extFromMime(info.mime);
+      const relPath = (basePathNoExt + "." + ext).replace(/\\/g, "/");
+      await writeBlobToDirectoryPath(assetDirHandle, relPath, info.blob);
+      return relPath;
+    }
+
+    function hasEmbeddedImages(cards) {
+      const list = Array.isArray(cards) ? cards : [];
+      return list.some((card) => {
+        const mains = Array.isArray(card.mainImages) ? card.mainImages : [];
+        if (mains.some((src) => isDataUrl(src))) return true;
+        const refs = Array.isArray(card.references) ? card.references : [];
+        return refs.some((src) => isDataUrl(src));
+      });
+    }
+
+    async function externalizeCardsImages(cards) {
+      const normalized = normalizeCards(cards);
+      if (!hasEmbeddedImages(normalized)) return normalized;
+      const assetDirHandle = await ensureWritableAssetDirHandle(true);
+      if (!assetDirHandle) throw new Error("asset-dir-required");
+      const stamp = Date.now().toString(36);
+      const out = [];
+      for (const card of normalized) {
+        normalizeMainImages(card);
+        const folder = buildAssetFolder(card);
+        const nextCard = { ...card };
+        const mains = [];
+        for (let i = 0; i < card.mainImages.length; i++) {
+          const src = card.mainImages[i];
+          const base = folder + "/main-" + String(i + 1).padStart(2, "0") + "-" + stamp;
+          mains.push(await materializeImageSrc(src, base, assetDirHandle));
+        }
+        const refs = [];
+        for (let i = 0; i < card.references.length; i++) {
+          const src = card.references[i];
+          const base = folder + "/ref-" + String(i + 1).padStart(2, "0") + "-" + stamp;
+          refs.push(await materializeImageSrc(src, base, assetDirHandle));
+        }
+        nextCard.mainImages = mains;
+        nextCard.mainImageIndex = mains.length ? clamp(Number(card.mainImageIndex) || 0, 0, mains.length - 1) : 0;
+        nextCard.mainImage = mains.length ? mains[nextCard.mainImageIndex] : "";
+        nextCard.references = refs;
+        out.push(nextCard);
+      }
+      return normalizeCards(out);
+    }
+
+    function normalizeCards(cards) {
+      const safe = Array.isArray(cards) ? cards : [];
+      return safe.map((c, idx) => {
+        const id = c && c.id ? String(c.id) : uid();
+        const title = c && typeof c.title === "string" ? c.title : "";
+        const prompt = c && typeof c.prompt === "string" ? c.prompt : "";
+        const legacyMain = c && typeof c.mainImage === "string" ? c.mainImage : "";
+        const mainsRaw = c && Array.isArray(c.mainImages) ? c.mainImages : (legacyMain ? [legacyMain] : []);
+        const mains = mainsRaw.filter(x => typeof x === "string" && x).slice(0, MAX_MAIN_IMAGES);
+        const idxRaw = c && Number.isFinite(c.mainImageIndex) ? Number(c.mainImageIndex) : 0;
+        const mainImageIndex = mains.length ? clamp(idxRaw, 0, mains.length - 1) : 0;
+        const mainImage = mains.length ? mains[mainImageIndex] : "";
+        const refs = c && Array.isArray(c.references) ? c.references.filter(x => typeof x === "string") : [];
+        const order = c && Number.isFinite(c.order) ? Number(c.order) : idx + 1;
+        return {
+          id,
+          title,
+          prompt,
+          mainImage,
+          mainImages: mains,
+          mainImageIndex,
+          references: refs.slice(0, MAX_REF_IMAGES),
+          order
+        };
+      }).sort((a, b) => a.order - b.order);
+    }
+
+    function normalizeMainImages(card) {
+      if (!card) return;
+      const legacyMain = typeof card.mainImage === "string" ? card.mainImage : "";
+      const mainsRaw = Array.isArray(card.mainImages) ? card.mainImages : (legacyMain ? [legacyMain] : []);
+      const mains = mainsRaw.filter(x => typeof x === "string" && x).slice(0, MAX_MAIN_IMAGES);
+      const idxRaw = Number.isFinite(card.mainImageIndex) ? Number(card.mainImageIndex) : 0;
+      const mainImageIndex = mains.length ? clamp(idxRaw, 0, mains.length - 1) : 0;
+      card.mainImages = mains;
+      card.mainImageIndex = mainImageIndex;
+      card.mainImage = mains.length ? mains[mainImageIndex] : "";
+    }
+
+    function getCardMainImages(card) {
+      if (!card) return [];
+      normalizeMainImages(card);
+      return card.mainImages;
+    }
+
+    function getCardMainImage(card) {
+      if (!card) return "";
+      normalizeMainImages(card);
+      return card.mainImage || "";
+    }
+
+    function createEmptyCard() {
+      const order = state.cards.length ? Math.max(...state.cards.map(c => c.order)) + 1 : 1;
+      return { id: uid(), title: "", prompt: "", mainImage: "", mainImages: [], mainImageIndex: 0, references: [], order };
+    }
+
+    function ensureAtLeastOneCard(focusAfterRender) {
+      if (state.cards.length) return;
+      const card = createEmptyCard();
+      state.cards.push(card);
+      if (focusAfterRender) setTimeout(() => focusNewCardById(card.id), 0);
+    }
+
+    function focusNewCardById(id) {
+      if (!id) return;
+      const cardEl = el.cards.querySelector('[data-id="' + id + '"]');
+      if (!cardEl) return;
+      cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      const titleInput = cardEl.querySelector(".titleInput");
+      if (titleInput) titleInput.focus();
+    }
+
+    function addCard() {
+      const newCard = createEmptyCard();
+      state.cards.push(newCard);
+      markDirty();
+      render();
+      toast(t("cardAdded"));
+      if (state.prefs.focusNewCard) {
+        setTimeout(() => focusNewCardById(newCard.id), 0);
+      }
+    }
+
+    function deleteCard(id) {
+      state.cards = state.cards.filter(c => c.id !== id);
+      reindexOrder();
+      markDirty();
+      render();
+      toast(t("cardRemoved"));
+    }
+
+    function moveCard(id, dir) {
+      const idx = state.cards.findIndex(c => c.id === id);
+      if (idx < 0) return;
+      const target = idx + dir;
+      if (target < 0 || target >= state.cards.length) return;
+      const a = state.cards[idx];
+      const b = state.cards[target];
+      const tmp = a.order;
+      a.order = b.order;
+      b.order = tmp;
+      state.cards.sort((x, y) => x.order - y.order);
+      reindexOrder();
+      markDirty();
+      render();
+    }
+
+    function reindexOrder() {
+      state.cards.sort((a, b) => a.order - b.order);
+      state.cards.forEach((c, i) => c.order = i + 1);
+    }
+
+    function getCard(id) {
+      return state.cards.find(c => c.id === id) || null;
+    }
+
+    function setCardTitle(id, value) {
+      const c = getCard(id);
+      if (!c) return;
+      c.title = value;
+      markDirty();
+    }
+
+    function setCardPrompt(id, value) {
+      const c = getCard(id);
+      if (!c) return;
+      c.prompt = value;
+      markDirty();
+    }
+
+    function applyPromptDirection(textarea) {
+      const v = String(textarea.value || "").trim();
+      const hasHeb = /[\u0590-\u05FF]/.test(v);
+      textarea.dir = hasHeb ? "rtl" : "ltr";
+      textarea.style.textAlign = hasHeb ? "right" : "left";
+    }
+
+    function autoGrowPrompt(textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = Math.max(textarea.scrollHeight, textarea.clientHeight, 120) + "px";
+    }
+
+    async function addMainImagesFromFiles(id, files) {
+      const c = getCard(id);
+      if (!c) return;
+      normalizeMainImages(c);
+      const list = Array.from(files || []).filter(f => f && f.type && f.type.startsWith("image/"));
+      if (!list.length) {
+        toast(t("noImages"));
+        return;
+      }
+      const remain = Math.max(0, MAX_MAIN_IMAGES - c.mainImages.length);
+      if (!remain) {
+        toast(t("mainImagesLimitReached"));
+        return;
+      }
+      const batch = list.slice(0, remain);
+      const urls = await Promise.all(batch.map((f) => fileToDataUrl(f)));
+      const start = c.mainImages.length;
+      c.mainImages = c.mainImages.concat(urls);
+      c.mainImageIndex = c.mainImages.length ? start : 0;
+      normalizeMainImages(c);
+      markDirty();
+      render();
+      if (list.length > remain) {
+        toast(t("mainImagesLimitReached"));
+      } else if (c.mainImages.length === 1) {
+        toast(t("mainUpdated"));
+      } else {
+        toast(t("mainImagesUpdated"));
+      }
+    }
+
+    function setActiveMainImageIndex(id, index) {
+      const c = getCard(id);
+      if (!c) return;
+      normalizeMainImages(c);
+      if (!c.mainImages.length) return;
+      c.mainImageIndex = clamp(Number(index) || 0, 0, c.mainImages.length - 1);
+      normalizeMainImages(c);
+      render();
+    }
+
+    function stepMainImage(id, step) {
+      const c = getCard(id);
+      if (!c) return;
+      normalizeMainImages(c);
+      const len = c.mainImages.length;
+      if (len < 2) return;
+      c.mainImageIndex = (c.mainImageIndex + step + len) % len;
+      normalizeMainImages(c);
+      render();
+    }
+
+    function removeMainImageAt(id, index) {
+      const c = getCard(id);
+      if (!c) return;
+      normalizeMainImages(c);
+      if (!c.mainImages.length) return;
+      const idx = Number(index);
+      const safeIndex = clamp(Number.isFinite(idx) ? idx : c.mainImageIndex, 0, c.mainImages.length - 1);
+      c.mainImages.splice(safeIndex, 1);
+      if (c.mainImageIndex > safeIndex) c.mainImageIndex -= 1;
+      if (c.mainImageIndex >= c.mainImages.length) c.mainImageIndex = Math.max(0, c.mainImages.length - 1);
+      normalizeMainImages(c);
+      markDirty();
+      render();
+    }
+
+    function removeMainImage(id) {
+      const c = getCard(id);
+      if (!c) return;
+      removeMainImageAt(id, c.mainImageIndex);
+    }
+
+    async function addRefsFromFiles(id, files) {
+      const c = getCard(id);
+      if (!c) return;
+      const list = Array.from(files || []).filter(f => f && f.type && f.type.startsWith("image/"));
+      if (!list.length) {
+        toast(t("noImages"));
+        return;
+      }
+      const remain = Math.max(0, MAX_REF_IMAGES - c.references.length);
+      if (!remain) {
+        toast(t("refsLimitReached"));
+        return;
+      }
+      const batch = list.slice(0, remain);
+      const urls = await Promise.all(batch.map((f) => fileToDataUrl(f)));
+      c.references = c.references.concat(urls);
+      markDirty();
+      render();
+      if (list.length > remain) {
+        toast(t("refsLimitReached"));
+      } else {
+        toast(t("refsUpdated"));
+      }
+    }
+
+    function removeRef(id, index) {
+      const c = getCard(id);
+      if (!c) return;
+      c.references.splice(index, 1);
+      markDirty();
+      render();
+    }
+
+    function togglePresent() {
+      closeSettings();
+      state.present = !state.present;
+      el.body.classList.toggle("present", state.present);
+      el.presentBtn.textContent = state.present ? t("admin") : t("present");
+      toast(state.present ? t("presentOn") : t("presentOff"));
+    }
+
+    function openViewer(title, src, items, index) {
+      if (!src) return;
+      state.viewer.open = true;
+      state.viewer.title = title || t("viewer");
+      state.viewer.src = src;
+      state.viewer.items = Array.isArray(items) && items.length ? items.slice() : [src];
+      const safeIndex = Number.isFinite(index) ? Number(index) : state.viewer.items.indexOf(src);
+      state.viewer.index = safeIndex >= 0 ? safeIndex : 0;
+      state.viewer.scale = 1;
+      state.viewer.fitScale = 1;
+      state.viewer.x = 0;
+      state.viewer.y = 0;
+      renderViewer();
+      el.overlay.classList.add("open");
+      el.overlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeViewer() {
+      state.viewer.open = false;
+      state.viewer.items = [];
+      state.viewer.index = 0;
+      el.overlay.classList.remove("open");
+      el.overlay.setAttribute("aria-hidden", "true");
+      el.panZoom.innerHTML = "";
+    }
+
+    function renderViewer() {
+      el.viewerTitle.textContent = state.viewer.title || t("viewer");
+      el.panZoom.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = state.viewer.src;
+      img.alt = state.viewer.title || "";
+      img.draggable = false;
+      img.addEventListener("load", () => {
+        const viewerMain = el.overlay.querySelector(".viewerMain");
+        const boxW = viewerMain ? viewerMain.clientWidth : 0;
+        const boxH = viewerMain ? viewerMain.clientHeight : 0;
+        const iw = img.naturalWidth || 1;
+        const ih = img.naturalHeight || 1;
+        const fit = boxW > 0 && boxH > 0 ? Math.min(boxW / iw, boxH / ih) : 1;
+        state.viewer.fitScale = Number.isFinite(fit) && fit > 0 ? fit : 1;
+        state.viewer.scale = state.viewer.fitScale;
+        state.viewer.x = 0;
+        state.viewer.y = 0;
+        applyViewerTransform(img);
+      });
+      el.panZoom.appendChild(img);
+      applyViewerTransform(img);
+    }
+
+    function applyViewerTransform(img) {
+      const s = state.viewer.scale;
+      const x = state.viewer.x;
+      const y = state.viewer.y;
+      img.style.transform = "translate(50%, -50%) translate(" + x + "px, " + y + "px) scale(" + s + ")";
+      updateViewerZoomPct();
+    }
+
+    function updateViewerZoomPct() {
+      if (!el.viewerZoomPct) return;
+      const s = Number(state.viewer.scale) || 1;
+      el.viewerZoomPct.textContent = Math.max(1, Math.round(s * 100)) + "%";
+    }
+
+    function handleViewerWheel(e) {
+      if (!state.viewer.open) return;
+      e.preventDefault();
+      const img = el.panZoom.querySelector("img");
+      if (!img) return;
+      const factor = e.deltaY > 0 ? 0.92 : 1.08;
+      state.viewer.scale = clamp(state.viewer.scale * factor, state.viewer.minScale, state.viewer.maxScale);
+      applyViewerTransform(img);
+    }
+
+    function handleViewerDown(e) {
+      if (!state.viewer.open) return;
+      if (e.button !== 0) return;
+      const img = el.panZoom.querySelector("img");
+      if (!img || e.target !== img) return;
+      state.viewer.dragging = true;
+      state.viewer.dragStartX = e.clientX;
+      state.viewer.dragStartY = e.clientY;
+      state.viewer.baseX = state.viewer.x;
+      state.viewer.baseY = state.viewer.y;
+    }
+
+    function handleViewerMove(e) {
+      if (!state.viewer.open) return;
+      if (!state.viewer.dragging) return;
+      const img = el.panZoom.querySelector("img");
+      if (!img) return;
+      state.viewer.x = state.viewer.baseX + (e.clientX - state.viewer.dragStartX);
+      state.viewer.y = state.viewer.baseY + (e.clientY - state.viewer.dragStartY);
+      applyViewerTransform(img);
+    }
+
+    function handleViewerUp() {
+      state.viewer.dragging = false;
+    }
+
+    function resetViewer() {
+      const img = el.panZoom.querySelector("img");
+      if (!img) return;
+      state.viewer.scale = state.viewer.fitScale || 1;
+      state.viewer.x = 0;
+      state.viewer.y = 0;
+      applyViewerTransform(img);
+    }
+
+    function setViewer100() {
+      const img = el.panZoom.querySelector("img");
+      if (!img) return;
+      state.viewer.scale = 1;
+      state.viewer.x = 0;
+      state.viewer.y = 0;
+      applyViewerTransform(img);
+    }
+
+    function viewerGo(step) {
+      if (!state.viewer.open) return;
+      const items = Array.isArray(state.viewer.items) ? state.viewer.items : [];
+      if (!items.length) return;
+      const next = clamp(state.viewer.index + step, 0, items.length - 1);
+      if (next === state.viewer.index) return;
+      state.viewer.index = next;
+      state.viewer.src = items[next];
+      renderViewer();
+    }
+
+    function openViewerInTab() {
+      if (!state.viewer.src) return;
+      const src = state.viewer.src;
+      if (src.startsWith("data:")) {
+        try {
+          const commaIdx = src.indexOf(",");
+          if (commaIdx > 0) {
+            const header = src.slice(0, commaIdx);
+            const body = src.slice(commaIdx + 1);
+            const mimeMatch = /^data:([^;]+)/i.exec(header);
+            const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+            const isBase64 = /;base64/i.test(header);
+            const binary = isBase64 ? atob(body) : decodeURIComponent(body);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            const blob = new Blob([bytes], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 60 * 1000);
+            return;
+          }
+        } catch {}
+      }
+      const a = document.createElement("a");
+      a.href = src;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function downloadJson(data) {
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "data.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function finalizeSave(cardsForState, clearDirtyAfterSave) {
+      state.cards = normalizeCards(cardsForState);
+      ensureAtLeastOneCard(false);
+      render();
+      if (clearDirtyAfterSave) clearDirty();
+    }
+
+    async function saveData(clearDirtyAfterSave) {
+      let cardsForSave = null;
+      try {
+        cardsForSave = await externalizeCardsImages(state.cards);
+      } catch (err) {
+        const key = err && err.message === "asset-dir-required" ? "pickAssetsFolder" : "assetsSaveFailed";
+        toast(t(key));
+        return false;
+      }
+
+      const payload = {
+        version: 2,
+        prefs: { ...state.prefs },
+        cards: cardsForSave,
+        savedAt: new Date().toISOString(),
+      };
+      void cacheDataObject(payload);
+      const data = JSON.stringify(payload, null, 2);
+
+      const canUseFsApi = "showSaveFilePicker" in window;
+      if (!canUseFsApi) {
+        downloadJson(data);
+        finalizeSave(cardsForSave, clearDirtyAfterSave);
+        return true;
+      }
+
+      let handle = await ensureWritableJsonFileHandle();
+      if (!handle) {
+        try {
+          handle = await window.showSaveFilePicker({
+            suggestedName: "data.json",
+            types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
+          });
+          state.fileHandle = handle;
+          void cacheJsonFileHandle(handle);
+        } catch {
+          downloadJson(data);
+          finalizeSave(cardsForSave, clearDirtyAfterSave);
+          return true;
+        }
+      }
+
+      try {
+        const writable = await handle.createWritable();
+        await writable.write(data);
+        await writable.close();
+        finalizeSave(cardsForSave, clearDirtyAfterSave);
+        return true;
+      } catch {
+        // File handle can become invalid (moved/deleted/revoked). Ask again once.
+        state.fileHandle = null;
+        void cacheJsonFileHandle(null);
+        try {
+          const retryHandle = await window.showSaveFilePicker({
+            suggestedName: "data.json",
+            types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
+          });
+          state.fileHandle = retryHandle;
+          void cacheJsonFileHandle(retryHandle);
+          const writable = await retryHandle.createWritable();
+          await writable.write(data);
+          await writable.close();
+          finalizeSave(cardsForSave, clearDirtyAfterSave);
+          return true;
+        } catch {
+          downloadJson(data);
+          finalizeSave(cardsForSave, clearDirtyAfterSave);
+          return true;
+        }
+      }
+    }
+
+    function applyLoadedDataObject(obj, showLoadedToast) {
+      state.cards = normalizeCards(obj.cards);
+      ensureAtLeastOneCard(false);
+      if (obj.prefs) {
+        const p = obj.prefs;
+        if (p.theme === "light" || p.theme === "dark") state.prefs.theme = p.theme;
+        if (typeof p.schemeKey === "string") state.prefs.schemeKey = p.schemeKey;
+        if (Number.isFinite(p.uiScale)) state.prefs.uiScale = clamp(Number(p.uiScale), 0.8, 2);
+        if (p.lang === "he" || p.lang === "en") state.prefs.lang = p.lang;
+        if (typeof p.focusNewCard === "boolean") state.prefs.focusNewCard = p.focusNewCard;
+        if (p.layout === "classic" || p.layout === "promptRefsLeft") state.prefs.layout = p.layout;
+      }
+      applyPrefs(state.prefs);
+      applyLanguage();
+      persistPrefsToLocalStorage();
+      reindexOrder();
+      render();
+      clearDirty();
+      void cacheDataObject({
+        version: 2,
+        prefs: { ...state.prefs },
+        cards: normalizeCards(state.cards),
+        savedAt: obj && obj.savedAt ? obj.savedAt : new Date().toISOString(),
+      });
+      if (showLoadedToast) toast(t("loaded"));
+    }
+
+    async function loadDataFromFile(file) {
+      const text = await file.text();
+      const obj = JSON.parse(text);
+      applyLoadedDataObject(obj, true);
+    }
+
+    async function loadDataFromSameFolder(showFailToast, showLoadedToast) {
+      try {
+        const dataUrl = new URL("./data.json", window.location.href);
+        const res = await fetch(dataUrl.toString(), { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const obj = await res.json();
+        applyLoadedDataObject(obj, !!showLoadedToast);
+        return true;
+      } catch {
+        if (showFailToast) toast(t("loadFailed"));
+        return false;
+      }
+    }
+
+    async function loadTemplateFromSameFolder() {
+      try {
+        const tplUrl = new URL("./data.template.json", window.location.href);
+        const res = await fetch(tplUrl.toString(), { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const obj = await res.json();
+        applyLoadedDataObject(obj, false);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    async function requestLoad() {
+      if (window.location.protocol === "file:") {
+        el.jsonFileInput.value = "";
+        el.jsonFileInput.click();
+        return;
+      }
+      const loaded = await loadDataFromSameFolder(false, true);
+      if (loaded) return;
+      el.jsonFileInput.value = "";
+      el.jsonFileInput.click();
+      toast(t("loadFailed"));
+    }
+
+    async function initApp() {
+      fillScaleSelects();
+      loadPrefsFromLocalStorage();
+      await restoreCachedJsonFileHandle();
+      await restoreCachedAssetDirHandle();
+      applyPrefs(state.prefs);
+      applyLanguage();
+      persistPrefsToLocalStorage();
+      updateDirtyUI();
+      const loaded = await loadDataFromSameFolder(false, false);
+      if (!loaded) {
+        const cached = await readCachedDataObject();
+        if (cached) {
+          applyLoadedDataObject(cached, false);
+          return;
+        }
+        const fromTemplate = await loadTemplateFromSameFolder();
+        if (fromTemplate) return;
+        ensureAtLeastOneCard(true);
+        render();
+        clearDirty();
+      }
+    }
+
+    function render() {
+      reindexOrder();
+      el.cards.innerHTML = "";
+      for (const card of state.cards) el.cards.appendChild(renderCard(card));
+      requestAnimationFrame(() => {
+        el.cards.querySelectorAll(".promptArea textarea").forEach((ta) => autoGrowPrompt(ta));
+      });
+    }
+
+    function renderCard(card) {
+      const wrap = document.createElement("div");
+      wrap.className = "card";
+      wrap.setAttribute("data-id", card.id);
+      wrap.draggable = false;
+      const header = document.createElement("div");
+      header.className = "cardHeader";
+
+      const headerLeft = document.createElement("div");
+      headerLeft.className = "cardHeaderLeft";
+
+      const title = document.createElement("input");
+      title.className = "titleInput";
+      title.placeholder = t("titlePlaceholder");
+      title.value = card.title || "";
+      title.addEventListener("input", () => setCardTitle(card.id, title.value));
+      const mainImages = getCardMainImages(card);
+      const activeMainIndex = Number.isFinite(card.mainImageIndex) ? Number(card.mainImageIndex) : 0;
+      const activeMainSrc = getCardMainImage(card);
+      const titleRes = document.createElement("span");
+      titleRes.className = "titleResMeta";
+      titleRes.textContent = activeMainSrc ? "..." : "";
+      headerLeft.appendChild(title);
+      headerLeft.appendChild(titleRes);
+
+      const headerRight = document.createElement("div");
+      headerRight.className = "cardHeaderRight";
+
+      const up = document.createElement("button");
+      up.className = "btn btnSmall btnTonal adminOnly";
+      up.textContent = t("up");
+      up.addEventListener("click", () => moveCard(card.id, -1));
+
+      const down = document.createElement("button");
+      down.className = "btn btnSmall btnTonal adminOnly";
+      down.textContent = t("down");
+      down.addEventListener("click", () => moveCard(card.id, 1));
+
+      const del = document.createElement("button");
+      del.className = "btn btnSmall btnDanger adminOnly";
+      del.textContent = t("delete");
+      del.addEventListener("click", () => {
+        const ok = confirm(t("deleteConfirm"));
+        if (ok) deleteCard(card.id);
+      });
+
+      headerRight.appendChild(up);
+      headerRight.appendChild(down);
+      headerRight.appendChild(del);
+
+      header.appendChild(headerLeft);
+      header.appendChild(headerRight);
+
+      const body = document.createElement("div");
+      body.className = "cardBody";
+
+      const mainCol = document.createElement("div");
+      mainCol.className = "block mainBlockCol";
+
+      const mainArea = document.createElement("div");
+      mainArea.className = "mainImageArea";
+
+      const mainLayout = document.createElement("div");
+      mainLayout.className = "mainImageLayout";
+
+      const mainThumbRail = document.createElement("div");
+      mainThumbRail.className = "mainThumbRail";
+
+      const addMainThumb = document.createElement("button");
+      addMainThumb.type = "button";
+      addMainThumb.className = "mainThumbAdd adminOnly";
+      addMainThumb.textContent = "+";
+      addMainThumb.title = t("addMainImages");
+      if (mainImages.length >= MAX_MAIN_IMAGES) addMainThumb.classList.add("isFull");
+      addMainThumb.addEventListener("click", () => {
+        if (state.present) return;
+        if (mainImages.length >= MAX_MAIN_IMAGES) {
+          toast(t("mainImagesLimitReached"));
+          return;
+        }
+        el.mainFileInput.value = "";
+        el.mainFileInput.onchange = async () => {
+          const files = el.mainFileInput.files;
+          if (files && files.length) await addMainImagesFromFiles(card.id, files);
+        };
+        el.mainFileInput.click();
+      });
+      mainThumbRail.appendChild(addMainThumb);
+
+      for (let i = 0; i < mainImages.length; i++) {
+        const thumb = document.createElement("button");
+        thumb.type = "button";
+        thumb.className = "mainThumbItem" + (i === activeMainIndex ? " active" : "");
+        const tImg = document.createElement("img");
+        tImg.src = mainImages[i];
+        tImg.alt = (card.title || t("mainBlock")) + " " + (i + 1);
+        thumb.appendChild(tImg);
+
+        const x = document.createElement("div");
+        x.className = "x adminOnly";
+        x.textContent = "×";
+        x.title = t("remove");
+        x.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          removeMainImageAt(card.id, i);
+        });
+        thumb.appendChild(x);
+
+        thumb.addEventListener("click", () => setActiveMainImageIndex(card.id, i));
+        mainThumbRail.appendChild(thumb);
+      }
+
+      const mainBox = document.createElement("div");
+      mainBox.className = "mainImageBox";
+      const overlay = document.createElement("div");
+      overlay.className = "dropOverlay";
+      overlay.textContent = t("dropMain");
+      mainBox.appendChild(overlay);
+
+      let mainDragDepth = 0;
+      mainBox.addEventListener("dragenter", (e) => {
+        if (state.present) return;
+        e.preventDefault();
+        mainDragDepth += 1;
+        mainBox.classList.add("dragOver");
+      });
+      mainBox.addEventListener("dragover", (e) => {
+        if (state.present) return;
+        e.preventDefault();
+        mainBox.classList.add("dragOver");
+      });
+      mainBox.addEventListener("dragleave", () => {
+        if (state.present) return;
+        mainDragDepth = Math.max(0, mainDragDepth - 1);
+        if (!mainDragDepth) mainBox.classList.remove("dragOver");
+      });
+      mainBox.addEventListener("drop", async (e) => {
+        if (state.present) return;
+        e.preventDefault();
+        mainDragDepth = 0;
+        mainBox.classList.remove("dragOver");
+        const files = e.dataTransfer.files;
+        if (files && files.length) await addMainImagesFromFiles(card.id, files);
+      });
+      mainBox.addEventListener("click", (e) => {
+        if (state.present) return;
+        if (e.target.closest(".mainImageRemove")) return;
+        if (e.target.closest(".mainNavBtn")) return;
+        if (e.target.tagName === "IMG") return;
+        if (mainImages.length >= MAX_MAIN_IMAGES) {
+          toast(t("mainImagesLimitReached"));
+          return;
+        }
+        el.mainFileInput.value = "";
+        el.mainFileInput.onchange = async () => {
+          const files = el.mainFileInput.files;
+          if (files && files.length) await addMainImagesFromFiles(card.id, files);
+        };
+        el.mainFileInput.click();
+      });
+
+      if (activeMainSrc) {
+        const img = document.createElement("img");
+        img.src = activeMainSrc;
+        img.alt = card.title || t("mainBlock");
+        img.addEventListener("click", () => openViewer(card.title || t("viewer"), activeMainSrc, mainImages, activeMainIndex));
+        mainBox.appendChild(img);
+
+        if (mainImages.length > 1) {
+          const prevBtn = document.createElement("button");
+          prevBtn.type = "button";
+          prevBtn.className = "mainNavBtn mainNavPrev";
+          prevBtn.textContent = "◀";
+          prevBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            stepMainImage(card.id, -1);
+          });
+          mainBox.appendChild(prevBtn);
+
+          const nextBtn = document.createElement("button");
+          nextBtn.type = "button";
+          nextBtn.className = "mainNavBtn mainNavNext";
+          nextBtn.textContent = "▶";
+          nextBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            stepMainImage(card.id, 1);
+          });
+          mainBox.appendChild(nextBtn);
+        }
+
+        const delMain = document.createElement("button");
+        delMain.type = "button";
+        delMain.className = "mainImageRemove adminOnly";
+        delMain.title = t("deleteMain");
+        delMain.textContent = "×";
+        delMain.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          removeMainImage(card.id);
+        });
+        mainBox.appendChild(delMain);
+      } else {
+        const dz = document.createElement("div");
+        dz.className = "dropZone adminOnly";
+        dz.textContent = t("dropMainHelp");
+        mainBox.appendChild(dz);
+      }
+
+      mainLayout.appendChild(mainThumbRail);
+      mainLayout.appendChild(mainBox);
+      mainArea.appendChild(mainLayout);
+      mainCol.appendChild(mainArea);
+
+      const refs = Array.isArray(card.references) ? card.references : [];
+      const refsCol = document.createElement("div");
+      refsCol.className = "block refsBlockCol";
+
+      if (activeMainSrc) {
+        const mainSrc = activeMainSrc;
+        getImageSize(mainSrc).then((size) => {
+          const current = getCard(card.id);
+          if (!current || getCardMainImage(current) !== mainSrc) return;
+          const text = sizeText(size);
+          titleRes.textContent = text;
+        });
+      } else {
+        titleRes.textContent = "";
+      }
+
+      const refsTitle = document.createElement("div");
+      refsTitle.className = "blockTitle";
+      refsTitle.textContent = t("refsPanelTitle");
+      refsCol.appendChild(refsTitle);
+
+      const refsStrip = document.createElement("div");
+      refsStrip.className = "refsStrip";
+
+      let refsStripDragDepth = 0;
+      refsStrip.addEventListener("dragenter", (e) => {
+        if (state.present) return;
+        e.preventDefault();
+        refsStripDragDepth += 1;
+        refsStrip.classList.add("dragOver");
+      });
+      refsStrip.addEventListener("dragover", (e) => {
+        if (state.present) return;
+        e.preventDefault();
+        refsStrip.classList.add("dragOver");
+      });
+      refsStrip.addEventListener("dragleave", () => {
+        if (state.present) return;
+        refsStripDragDepth = Math.max(0, refsStripDragDepth - 1);
+        if (!refsStripDragDepth) refsStrip.classList.remove("dragOver");
+      });
+      refsStrip.addEventListener("drop", async (e) => {
+        if (state.present) return;
+        e.preventDefault();
+        refsStripDragDepth = 0;
+        refsStrip.classList.remove("dragOver");
+        const files = e.dataTransfer.files;
+        if (files && files.length) await addRefsFromFiles(card.id, files);
+      });
+
+      const refsAddTile = document.createElement("button");
+      refsAddTile.type = "button";
+      refsAddTile.className = "refAddTile adminOnly";
+      refsAddTile.textContent = "+";
+      refsAddTile.title = t("refsDrop");
+      if (refs.length >= MAX_REF_IMAGES) refsAddTile.classList.add("isFull");
+      refsAddTile.addEventListener("dragover", (e) => {
+        if (state.present) return;
+        e.preventDefault();
+        refsAddTile.classList.add("dragOver");
+      });
+      refsAddTile.addEventListener("dragleave", () => refsAddTile.classList.remove("dragOver"));
+      refsAddTile.addEventListener("drop", () => refsAddTile.classList.remove("dragOver"));
+      refsAddTile.addEventListener("click", () => {
+        if (state.present) return;
+        if (refs.length >= MAX_REF_IMAGES) {
+          toast(t("refsLimitReached"));
+          return;
+        }
+        el.refFileInput.value = "";
+        el.refFileInput.onchange = async () => {
+          const files = el.refFileInput.files;
+          if (files && files.length) await addRefsFromFiles(card.id, files);
+        };
+        el.refFileInput.click();
+      });
+      refsStrip.appendChild(refsAddTile);
+
+      for (let i = 0; i < refs.length; i++) {
+        const thumb = document.createElement("div");
+        thumb.className = "refThumb";
+        const img = document.createElement("img");
+        img.src = refs[i];
+        img.alt = (card.title || "Ref") + " " + (i + 1);
+        img.addEventListener("click", () => openViewer(card.title || t("viewer"), refs[i], refs, i));
+        thumb.appendChild(img);
+
+        const x = document.createElement("div");
+        x.className = "x adminOnly";
+        x.textContent = "×";
+        x.title = t("remove");
+        x.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          removeRef(card.id, i);
+        });
+        thumb.appendChild(x);
+
+        refsStrip.appendChild(thumb);
+      }
+      refsCol.appendChild(refsStrip);
+
+      const promptCol = document.createElement("div");
+      promptCol.className = "block promptBlockCol";
+
+      const promptTitle = document.createElement("div");
+      promptTitle.className = "blockTitle";
+      promptTitle.textContent = t("prompt");
+      promptCol.appendChild(promptTitle);
+
+      const promptWrap = document.createElement("div");
+      promptWrap.className = "promptArea";
+      const ta = document.createElement("textarea");
+      ta.placeholder = t("promptPlaceholder");
+      ta.value = card.prompt || "";
+      applyPromptDirection(ta);
+      ta.addEventListener("focus", () => {
+        if (!ta.dataset.firstFocusDone) {
+          ta.dataset.firstFocusDone = "1";
+          ta.placeholder = "";
+          if (ta.value.trim() === t("promptPlaceholder")) ta.value = "";
+          applyPromptDirection(ta);
+          autoGrowPrompt(ta);
+        }
+      });
+      ta.addEventListener("input", () => {
+        applyPromptDirection(ta);
+        autoGrowPrompt(ta);
+        setCardPrompt(card.id, ta.value);
+      });
+      promptWrap.appendChild(ta);
+      requestAnimationFrame(() => autoGrowPrompt(ta));
+
+      promptCol.appendChild(promptWrap);
+
+      body.appendChild(mainCol);
+      body.appendChild(refsCol);
+      body.appendChild(promptCol);
+
+      wrap.appendChild(header);
+      wrap.appendChild(body);
+
+      return wrap;
+    }
+
+    el.addCardBtn.addEventListener("click", () => addCard());
+    el.addCardBottomBtn.addEventListener("click", () => addCard());
+    el.presentBtn.addEventListener("click", () => togglePresent());
+    el.saveBtn.addEventListener("click", async () => {
+      const ok = await saveData(true);
+      if (ok) toast(t("saved"));
+    });
+    el.loadBtn.addEventListener("click", () => requestLoad());
+    el.settingsBtn.addEventListener("click", () => openSettings());
+    el.helpBtn.addEventListener("click", () => openHelp());
+    el.helpCloseBtn.addEventListener("click", () => closeHelp());
+    el.helpOverlay.addEventListener("click", (e) => {
+      if (e.target === el.helpOverlay) closeHelp();
+    });
+    el.langToggleBtn.addEventListener("click", () => {
+      state.prefs.lang = state.prefs.lang === "he" ? "en" : "he";
+      applyLanguage();
+      persistPrefsToLocalStorage();
+    });
+
+    el.uiZoomSelect.addEventListener("change", () => updateScaleNow(el.uiZoomSelect.value));
+    el.uiZoomSelect2.addEventListener("change", () => updateScaleNow(el.uiZoomSelect2.value));
+    el.uiScaleDownBtn.addEventListener("click", () => stepScale(-10));
+    el.uiScaleUpBtn.addEventListener("click", () => stepScale(10));
+    el.uiScaleDownBtn2.addEventListener("click", () => stepScale(-10));
+    el.uiScaleUpBtn2.addEventListener("click", () => stepScale(10));
+
+    el.jsonFileInput.addEventListener("change", async () => {
+      const f = el.jsonFileInput.files && el.jsonFileInput.files[0];
+      if (!f) return;
+      try { await loadDataFromFile(f); } catch { toast(t("loadFailed")); }
+    });
+
+    el.viewerCloseBtn.addEventListener("click", () => closeViewer());
+    el.viewerPrevBtn.addEventListener("click", () => viewerGo(-1));
+    el.viewerNextBtn.addEventListener("click", () => viewerGo(1));
+    el.viewer100Btn.addEventListener("click", () => setViewer100());
+    el.viewerResetBtn.addEventListener("click", () => resetViewer());
+    el.viewerOpenBtn.addEventListener("click", () => openViewerInTab());
+
+    el.panZoom.addEventListener("wheel", handleViewerWheel, { passive: false });
+    el.panZoom.addEventListener("mousedown", handleViewerDown);
+    window.addEventListener("mousemove", handleViewerMove);
+    window.addEventListener("mouseup", handleViewerUp);
+
+    el.overlay.addEventListener("click", (e) => {
+      const isBackdrop = e.target === el.overlay;
+      if (isBackdrop) closeViewer();
+    });
+
+    el.settingsOverlay.addEventListener("click", () => closeSettings());
+    el.settingsCloseBtn.addEventListener("click", () => closeSettings());
+    el.themeToggleBtn.addEventListener("click", () => toggleThemeNow());
+    el.schemePrevBtn.addEventListener("click", () => stepScheme(-1));
+    el.schemeSelect.addEventListener("change", () => updateSchemeNow(el.schemeSelect.value));
+    el.schemeNextBtn.addEventListener("click", () => stepScheme(1));
+    el.layoutSelect.addEventListener("change", () => updateLayoutNow(el.layoutSelect.value));
+    el.focusNewCardToggle.addEventListener("change", () => {
+      state.prefs.focusNewCard = !!el.focusNewCardToggle.checked;
+      persistPrefsToLocalStorage();
+    });
+
+    window.addEventListener("keydown", async (e) => {
+      if (e.key === "Escape") {
+        if (state.viewer.open) { closeViewer(); return; }
+        if (el.helpOverlay.classList.contains("open")) { closeHelp(); return; }
+        if (state.settingsOpen) { closeSettings(); return; }
+        if (state.present) { togglePresent(); return; }
+      }
+      if (state.viewer.open && e.key === "ArrowRight") { e.preventDefault(); viewerGo(1); return; }
+      if (state.viewer.open && e.key === "ArrowLeft") { e.preventDefault(); viewerGo(-1); return; }
+    });
+
+    window.addEventListener("beforeunload", (e) => {
+      if (!state.isDirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    });
+
+    initApp();
+  </script>
+</body>
+</html>
+

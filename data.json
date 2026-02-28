@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "prefs": {
+    "theme": "dark",
+    "schemeKey": "sunsetOrange",
+    "uiScale": 1,
+    "lang": "he",
+    "focusNewCard": true,
+    "layout": "promptRefsLeft"
+  },
+  "cards": [
+    {
+      "id": "c4de10df97ae24819ca00b226b",
+      "title": "Knight ufo",
+      "prompt": "Create a seamless cinematic photo. The knight in the foreground is standing with his back or side to the camera, his head and body turned fully toward the crashed spaceship. He is looking directly at the glowing red core of the ship. His posture should convey shock, with one hand slightly raised. The intense red neon light from the spaceship must cast strong, direct reflections onto the knight's visor and the front of his armor. The forest background is dark and misty, making the light interaction between the ship and the knight the focal point. 8k resolution, photorealistic, dramatic composition.",
+      "mainImage": "Gallery/Knight/main-01-mm55i9wh.jpg",
+      "mainImages": [
+        "Gallery/Knight/main-01-mm55i9wh.jpg",
+        "Gallery/Knight/main-02-mm55i9wh.jpg"
+      ],
+      "mainImageIndex": 0,
+      "references": [
+        "Gallery/Knight/ref-01-mm55i9wh.jpg",
+        "Gallery/Knight/ref-02-mm55i9wh.webp",
+        "Gallery/Knight/ref-03-mm55i9wh.jpg"
+      ],
+      "order": 1
+    }
+  ],
+  "savedAt": "2026-02-27T17:13:44.344Z"
+}
